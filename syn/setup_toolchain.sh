@@ -12,15 +12,32 @@ set -euo pipefail
 SWITCH=netparse5
 COMPILER=5.2.1
 
-echo "=== apt packages ==="
-export DEBIAN_FRONTEND=noninteractive
-apt-get update -qq
-apt-get install -y -qq \
-  opam build-essential m4 pkg-config unzip curl git rsync ca-certificates \
-  libgmp-dev zlib1g-dev \
-  >/dev/null
+# System packages need root; the opam switch does not and should not have it.
+# Run this once as root to get the apt side, then again as your normal user to
+# get a switch you own.
+if [ "$(id -u)" -eq 0 ]; then
+  echo "=== apt packages (running as root) ==="
+  export DEBIAN_FRONTEND=noninteractive
+  apt-get update -qq
+  apt-get install -y -qq \
+    opam build-essential m4 pkg-config unzip curl git rsync ca-certificates \
+    libgmp-dev zlib1g-dev \
+    >/dev/null
+else
+  echo "=== not root: skipping apt, checking the system packages are present ==="
+  missing=""
+  for c in opam gcc m4 pkg-config curl git; do
+    command -v "$c" >/dev/null 2>&1 || missing="$missing $c"
+  done
+  if [ -n "$missing" ]; then
+    echo "error: missing system packages:$missing"
+    echo "Run once as root first:"
+    echo "  wsl -d Ubuntu-24.04 -u root -- bash $0"
+    exit 1
+  fi
+fi
 
-echo "opam: $(opam --version)"
+echo "opam: $(opam --version)   user: $(whoami)   OPAMROOT: ${OPAMROOT:-$HOME/.opam}"
 
 echo "=== opam init (sandboxing off; bubblewrap is unreliable under WSL) ==="
 if [ ! -d "$HOME/.opam" ]; then

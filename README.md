@@ -140,7 +140,9 @@ the shape of the failure identified the cause.
 Toolchain (Ubuntu, or WSL2 on Windows). `ppx_hardcaml` needs OCaml ≥ 5.1:
 
 ```bash
-bash syn/setup_toolchain.sh      # opam switch + hardcaml + ppx_hardcaml
+# once as root for the apt packages, then as your own user for the switch
+wsl -d Ubuntu-24.04 -u root -- bash syn/setup_toolchain.sh
+bash syn/setup_toolchain.sh
 ```
 
 Build, test, and emit RTL:

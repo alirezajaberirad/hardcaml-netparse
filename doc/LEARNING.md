@@ -247,7 +247,8 @@ Roughly in order of value-per-hour:
 ```bash
 # One-time
 wsl --install -d Ubuntu-24.04
-bash syn/setup_toolchain.sh          # opam switch + hardcaml (needs OCaml >= 5.1)
+wsl -d Ubuntu-24.04 -u root -- bash syn/setup_toolchain.sh   # apt packages
+bash syn/setup_toolchain.sh                                  # your own opam switch
 
 # Every time
 bash syn/test.sh                     # build + differential test
