@@ -122,6 +122,51 @@ The lesson: a differential test against a reference model does not just say
 "fail," it hands you the arithmetic of the failure. That is why the reference
 model is worth writing.
 
+## 5b. The optimisation that wasn't
+
+The second most instructive thing in the history, and the one most worth being
+able to tell.
+
+Synthesis came back with Fmax essentially flat across a **16× range** of
+datapath widths: 206, 208, 200, 212, 214 MHz. That is a real clue, and the
+inference from it was sound — a limit that does not move with the datapath must
+live in a block that is identical at every width.
+
+The guess as to *which* block was wrong. The suspect was the checksum adder
+tree, which was summing ten words with `List.fold_left ( +: )` — a **linear
+chain ten adders deep** rather than a depth-4 tree. That looks damning. It was
+restructured into a balanced tree, and synthesis re-run:
+
+| Datapath | linear | balanced | change |
+| ---: | ---: | ---: | ---: |
+| 32-bit | 206.1 | 205.7 | −0.2% |
+| 64-bit | 207.6 | 206.8 | −0.4% |
+| 128-bit | 200.4 | 213.1 | +6.3% |
+| 256-bit | 212.4 | 207.3 | −2.4% |
+| 512-bit | 214.0 | 203.1 | −5.1% |
+| **mean** | **208.1** | **207.2** | **−0.4%** |
+
+Nothing. **Mixed signs and a stationary mean is placement noise.** Vivado
+restructures arithmetic during synthesis, so the shape of the OCaml fold never
+reached the netlist to begin with.
+
+Two lessons, and they are the ones to actually carry:
+
+1. **A difference smaller than the spread between runs is not a result.** Had
+   only the 128-bit variant been built, the +6.3% would have looked like a
+   convincing win. It was noise. Always know your noise floor before you claim
+   an improvement — which means running the experiment more than once.
+2. **Measure the path; do not infer it.** `syn/vivado/critpath.tcl` reports the
+   routed worst path with its endpoints. It says: 13 logic levels, 4.797 ns,
+   `_90_reg[17]` → `_112_reg`. Cross-referencing the generated Verilog, `_90` is
+   the 20-bit `s1_csum_sum` register (sliced `[19:16]` and `[15:0]` — the carry
+   fold) and `_112` drives `err_bad_checksum`. The limit was **stage 2's fold**,
+   one pipeline stage downstream of where it was being looked for.
+
+If you are asked "tell me about a time you were wrong," this is the answer. The
+reasoning was defensible, the experiment falsified it, and the fix was to get
+better data rather than to argue.
+
 ## 6. Questions you should be able to answer cold
 
 Work through these out loud. If you cannot answer one, that is the part to
@@ -139,8 +184,8 @@ re-read.
 **Timing and throughput**
 5. What clock does a 64-bit datapath need for 10 GbE? For 25 GbE? Derive it.
 6. What is the latency from the last header beat to `valid`? Why three stages?
-7. Where is the critical path, and how would you shorten it? What does that
-   cost?
+7. Where is the critical path? Name the two registers it runs between, and say
+   how you would shorten it and what that costs.
 8. The 32-bit variant does not close 10 GbE timing. Why is that acceptable —
    or is it?
 
@@ -155,6 +200,8 @@ re-read.
 13. What does cross-width invariance catch that a single-width test does not?
 14. Why is a zero-length packet excluded from the sweep?
 15. What is *not* covered by this test suite?
+16. The balanced-tree change moved the 128-bit variant +6.3%. Why is that not
+    a result? What would you need to run to make it one?
 
 ## 7. Honest gaps — know these before someone finds them
 
@@ -178,9 +225,13 @@ A reviewer will look for what is missing. Better that you name it first.
 
 Roughly in order of value-per-hour:
 
-1. **Pipeline the checksum adder tree** across two stages and re-run synthesis.
-   Produces a before/after Fmax table — the single most convincing artifact a
-   timing-closure story can have.
+1. **Pipeline the checksum fold.** The measured critical path (see §5b) runs
+   from the `s1_csum_sum` register through both carry folds, the `0xFFFF`
+   compare, and the `malformed` OR-tree into the output register — 13 logic
+   levels, 4.797 ns. Putting a register between the fold and the compare should
+   split that roughly in half, at the cost of one more cycle of latency. Re-run
+   `syn/vivado/synth.tcl` and see whether it moves. **Run it more than once**:
+   §5b is the cautionary tale about what happens when you don't.
 2. **VLAN support.** A second set of slice offsets selected by a mux on
    ethertype. Small, and it exercises exactly the parameterization idea.
 3. **Runtime-writable filter table** over AXI4-Lite. Turns the toy into
