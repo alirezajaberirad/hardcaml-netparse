@@ -69,14 +69,17 @@ let ones_complement_sum buf ~off ~len =
 let ipv4_checksum_for buf ~off =
   lnot (ones_complement_sum buf ~off ~len:Packet_defs.ipv4_hdr_bytes) land 0xffff
 
-let lookup table ~dst_ip ~dst_port =
-  let rec go = function
+(* [entry] and [verdict] share dst_ip/dst_port/channel field names, and OCaml
+   resolves a bare field access to the last-defined record type -- so these
+   annotations are load-bearing, not decoration. *)
+let lookup (table : entry list) ~dst_ip ~dst_port =
+  let rec go : entry list -> entry option = function
     | [] -> None
     | e :: rest -> if e.dst_ip = dst_ip && e.dst_port = dst_port then Some e else go rest
   in
   go table
 
-let parse ~table (packet : Bytes.t) : verdict =
+let parse ~(table : entry list) (packet : Bytes.t) : verdict =
   let open Packet_defs in
   if Bytes.length packet < header_bytes
   then no_verdict

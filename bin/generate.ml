@@ -6,6 +6,7 @@
     different from each other, from one source with no duplicated logic. *)
 
 open Hardcaml
+open Netparse
 
 let emit ~dir ~w =
   let module P =

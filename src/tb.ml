@@ -111,8 +111,11 @@ module Make (Cfg : Parser_core.Config) = struct
       clear first, so packets are independent and a failure in one cannot
       cascade into the next. *)
   let run sim (packet : Bytes.t) =
-    let i = Cyclesim.inputs sim in
-    let o = Cyclesim.outputs sim in
+    (* Annotated because [result] below also has [valid]/[pass]/[channel]
+       fields, and OCaml would otherwise disambiguate [o.valid] to the
+       last-defined record type rather than to the port interface. *)
+    let i : Bits.t ref P.I.t = Cyclesim.inputs sim in
+    let o : Bits.t ref P.O.t = Cyclesim.outputs sim in
     let captured = ref no_result in
     let capture () =
       if Bits.to_int !(o.valid) = 1 && not !captured.valid

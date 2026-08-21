@@ -7,6 +7,8 @@
     catches essentially every straddling bug the accumulator design is meant to
     prevent. *)
 
+open Netparse
+
 let table = Filter_table.default
 
 (* One simulator per width. Each [Tb.Make] instance has its own [Cyclesim]
@@ -96,7 +98,11 @@ let () =
       ~name:(Printf.sprintf "payload=%d" payload_len)
       (Packet_gen.build { Packet_gen.default with dst_ip = 0xefc00001; dst_port = 15000; payload_len })
   done;
-  for len = 0 to Packet_defs.header_bytes do
+  (* From 1, not 0: a zero-byte frame is unrepresentable on AXI4-Stream -- there
+     is no beat on which to raise tlast -- so the RTL correctly sees no packet at
+     all and emits nothing. Comparing that against the model's "short" verdict
+     would be testing the harness, not the design. *)
+  for len = 1 to Packet_defs.header_bytes do
     incr sweep;
     let full = Packet_gen.build Packet_gen.default in
     check ~name:(Printf.sprintf "truncated to %d" len) (Bytes.sub full 0 len)

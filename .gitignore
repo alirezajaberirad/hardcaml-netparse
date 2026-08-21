@@ -3,8 +3,9 @@ _build/
 *.install
 .merlin
 
-# Generated RTL
-rtl/*.v
+# Generated RTL is committed on purpose: it lets the output be browsed
+# without installing the OCaml toolchain.
+
 
 # Vivado
 syn/vivado/*.jou

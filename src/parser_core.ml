@@ -32,8 +32,6 @@ module Make (Cfg : Config) = struct
   let min_bytes_last = Packet_defs.min_bytes_last_beat ~w
   let table = Cfg.table
 
-  let n_entries = List.length table
-
   let channel_bits =
     let max_channel =
       List.fold_left (fun a (e : Ref_model.entry) -> max a e.channel) 0 table
@@ -111,7 +109,7 @@ module Make (Cfg : Config) = struct
     let header_complete = wire 1 in
 
     let beat_count =
-      reg_fb spec ~enable:i.tvalid ~width:count_bits (fun c ->
+      reg_fb spec ~enable:i.tvalid ~width:count_bits ~f:(fun c ->
         mux2
           i.tlast
           (zero count_bits)
@@ -133,7 +131,7 @@ module Make (Cfg : Config) = struct
     let short_packet = i.tvalid &: i.tlast &: ~:hdr_done &: ~:header_complete in
 
     hdr_done
-    <== reg_fb spec ~enable:vdd ~width:1 (fun d ->
+    <== reg_fb spec ~enable:vdd ~width:1 ~f:(fun d ->
           mux2 (i.tvalid &: i.tlast) gnd (mux2 header_complete vdd d));
 
     (* ---------------------------------------------------------------- *)
@@ -141,7 +139,7 @@ module Make (Cfg : Config) = struct
     (* ---------------------------------------------------------------- *)
 
     let acc =
-      reg_fb spec ~enable:(i.tvalid &: ~:hdr_done) ~width:acc_bits (fun a ->
+      reg_fb spec ~enable:(i.tvalid &: ~:hdr_done) ~width:acc_bits ~f:(fun a ->
         (* Shift left by one beat and drop in the byte-swapped lanes. Sized so
            that after n_beats shifts, packet byte 0 sits at the MSB. *)
         select (a @: byteswap i.tdata) (acc_bits - 1) 0)
@@ -152,9 +150,17 @@ module Make (Cfg : Config) = struct
     (* Stage 1: slice the header, start the checksum                     *)
     (* ---------------------------------------------------------------- *)
 
-    let s1_en = header_complete |: short_packet in
+    (* [acc] is a register, so the final header beat is not visible on its
+       output until the cycle *after* [header_complete]. Sampling the fields on
+       [header_complete] itself reads the accumulator one beat stale -- which at
+       W = 4 means dst_ip lands on the source address. Hence [hdr_captured]:
+       everything downstream is enabled one cycle later, and this is why the
+       pipeline is three stages deep rather than two. *)
+    let hdr_captured = reg header_complete in
+    let short_captured = reg short_packet in
+    let s1_en = hdr_captured |: short_captured in
     let s1_valid = reg s1_en in
-    let s1_short = reg short_packet in
+    let s1_short = reg short_captured in
 
     (* acc is stable during this cycle: accumulation was disabled by hdr_done. *)
     let ethertype = field acc ~off:Packet_defs.off_ethertype ~len:2 in
@@ -256,9 +262,4 @@ module Make (Cfg : Config) = struct
 
   (** Total latency from the last header beat to [valid], in cycles. *)
   let latency = 3
-
-  let hierarchical scope =
-    let module H = Hierarchy.In_scope (I) (O) in
-    H.hierarchical ~scope ~name:(Printf.sprintf "netparse_w%d" w) create
-  ;;
 end
