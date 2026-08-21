@@ -81,35 +81,35 @@ module netparse_w8 (
     wire [12:0] _93;
     wire [16:0] _95;
     wire [19:0] _76;
-    wire [15:0] _72;
-    wire [3:0] _71;
-    wire [19:0] _73;
+    wire [15:0] _71;
+    wire [3:0] _70;
+    wire [19:0] _72;
     wire [15:0] _68;
     wire [19:0] _69;
-    wire [15:0] _64;
-    wire [19:0] _65;
-    wire [15:0] _60;
-    wire [19:0] _61;
-    wire [15:0] _56;
-    wire [19:0] _57;
+    wire [19:0] _73;
+    wire [15:0] _62;
+    wire [19:0] _63;
+    wire [15:0] _59;
+    wire [19:0] _60;
+    wire [19:0] _64;
+    wire [15:0] _55;
+    wire [19:0] _56;
     wire [15:0] _52;
     wire [19:0] _53;
-    wire [15:0] _48;
-    wire [19:0] _49;
+    wire [19:0] _57;
+    wire [19:0] _65;
+    wire [15:0] _47;
+    wire [19:0] _48;
     wire [15:0] _44;
     wire [19:0] _45;
+    wire [19:0] _49;
     wire [15:0] _40;
     wire [19:0] _41;
     wire [15:0] _37;
     wire [19:0] _38;
     wire [19:0] _42;
-    wire [19:0] _46;
     wire [19:0] _50;
-    wire [19:0] _54;
-    wire [19:0] _58;
-    wire [19:0] _62;
     wire [19:0] _66;
-    wire [19:0] _70;
     wire [19:0] _74;
     reg [19:0] _90;
     wire [15:0] _91;
@@ -361,46 +361,46 @@ module netparse_w8 (
     assign _95 = { _93,
                    _94 };
     assign _76 = 20'b00000000000000000000;
-    assign _72 = hdr_acc[127:112];
-    assign _71 = 4'b0000;
-    assign _73 = { _71,
-                   _72 };
+    assign _71 = hdr_acc[127:112];
+    assign _70 = 4'b0000;
+    assign _72 = { _70,
+                   _71 };
     assign _68 = hdr_acc[143:128];
-    assign _69 = { _71,
+    assign _69 = { _70,
                    _68 };
-    assign _64 = hdr_acc[159:144];
-    assign _65 = { _71,
-                   _64 };
-    assign _60 = hdr_acc[175:160];
-    assign _61 = { _71,
-                   _60 };
-    assign _56 = hdr_acc[191:176];
-    assign _57 = { _71,
-                   _56 };
+    assign _73 = _69 + _72;
+    assign _62 = hdr_acc[159:144];
+    assign _63 = { _70,
+                   _62 };
+    assign _59 = hdr_acc[175:160];
+    assign _60 = { _70,
+                   _59 };
+    assign _64 = _60 + _63;
+    assign _55 = hdr_acc[191:176];
+    assign _56 = { _70,
+                   _55 };
     assign _52 = hdr_acc[207:192];
-    assign _53 = { _71,
+    assign _53 = { _70,
                    _52 };
-    assign _48 = hdr_acc[223:208];
-    assign _49 = { _71,
-                   _48 };
+    assign _57 = _53 + _56;
+    assign _65 = _57 + _64;
+    assign _47 = hdr_acc[223:208];
+    assign _48 = { _70,
+                   _47 };
     assign _44 = hdr_acc[239:224];
-    assign _45 = { _71,
+    assign _45 = { _70,
                    _44 };
+    assign _49 = _45 + _48;
     assign _40 = hdr_acc[255:240];
-    assign _41 = { _71,
+    assign _41 = { _70,
                    _40 };
     assign _37 = hdr_acc[271:256];
-    assign _38 = { _71,
+    assign _38 = { _70,
                    _37 };
     assign _42 = _38 + _41;
-    assign _46 = _42 + _45;
-    assign _50 = _46 + _49;
-    assign _54 = _50 + _53;
-    assign _58 = _54 + _57;
-    assign _62 = _58 + _61;
-    assign _66 = _62 + _65;
-    assign _70 = _66 + _69;
-    assign _74 = _70 + _73;
+    assign _50 = _42 + _49;
+    assign _66 = _50 + _65;
+    assign _74 = _66 + _73;
     always @(posedge _21) begin
         if (_19)
             _90 <= _76;

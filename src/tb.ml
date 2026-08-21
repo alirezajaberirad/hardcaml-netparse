@@ -140,9 +140,18 @@ module Make (Cfg : Parser_core.Config) = struct
     i.clear := Bits.gnd;
     Cyclesim.cycle sim
 
-  (* Beats are driven with no gaps: an ingress parser has to sustain a
-     continuous stream, because the wire does not stop. *)
-  let drive_packet (i : Bits.t ref P.I.t) (o : Bits.t ref P.O.t) sim ~collect packet =
+  (* Beats are driven back to back by default: an ingress parser has to sustain
+     a continuous stream, because the wire does not stop. [gap] inserts idle
+     cycles (tvalid low) after each beat, which a real MAC does emit -- the
+     verdict must not depend on arrival timing. *)
+  let drive_packet
+        (i : Bits.t ref P.I.t)
+        (o : Bits.t ref P.O.t)
+        sim
+        ~collect
+        ?(gap = 0)
+        packet
+    =
     List.iter
       (fun (tdata, tkeep, last) ->
          i.tvalid := Bits.vdd;
@@ -150,7 +159,13 @@ module Make (Cfg : Parser_core.Config) = struct
          i.tkeep := tkeep;
          i.tlast := (if last then Bits.vdd else Bits.gnd);
          Cyclesim.cycle sim;
-         collect (sample o))
+         collect (sample o);
+         for _ = 1 to gap do
+           i.tvalid := Bits.gnd;
+           i.tlast := Bits.gnd;
+           Cyclesim.cycle sim;
+           collect (sample o)
+         done)
       (beats packet)
 
   let drain (i : Bits.t ref P.I.t) (o : Bits.t ref P.O.t) sim ~collect =
@@ -172,6 +187,22 @@ module Make (Cfg : Parser_core.Config) = struct
     in
     reset i sim;
     drive_packet i o sim ~collect packet;
+    drain i o sim ~collect;
+    !captured
+
+  (** One packet with [gap] idle cycles between every beat. The verdict must be
+      identical to the gapless case: [tvalid] gates both the beat counter and
+      the accumulator, so idle cycles should be invisible to the design. A
+      parser that counts cycles instead of beats passes {!run} and fails this. *)
+  let run_gapped sim ~gap (packet : Bytes.t) =
+    let i, o = ports sim in
+    let captured = ref no_result in
+    let collect = function
+      | Some r when not !captured.valid -> captured := r
+      | _ -> ()
+    in
+    reset i sim;
+    drive_packet i o sim ~collect ~gap packet;
     drain i o sim ~collect;
     !captured
 

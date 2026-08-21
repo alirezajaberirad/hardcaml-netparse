@@ -47,6 +47,14 @@ let runners : (int * (Bytes.t -> Tb.result)) list =
   ; (64, (let s = W64.create () in fun p -> W64.run s p))
   ]
 
+let gapped_runners : (int * (gap:int -> Bytes.t -> Tb.result)) list =
+  [ (4, (let s = W4.create () in fun ~gap p -> W4.run_gapped s ~gap p))
+  ; (8, (let s = W8.create () in fun ~gap p -> W8.run_gapped s ~gap p))
+  ; (16, (let s = W16.create () in fun ~gap p -> W16.run_gapped s ~gap p))
+  ; (32, (let s = W32.create () in fun ~gap p -> W32.run_gapped s ~gap p))
+  ; (64, (let s = W64.create () in fun ~gap p -> W64.run_gapped s ~gap p))
+  ]
+
 let stream_runners : (int * (Bytes.t list -> Tb.result list)) list =
   [ (4, (let s = W4.create () in fun ps -> W4.run_stream s ps))
   ; (8, (let s = W8.create () in fun ps -> W8.run_stream s ps))
@@ -75,6 +83,29 @@ let check ~name packet =
            (Tb.diff rtl model)
        end)
     runners
+
+(* Idle cycles between beats must not change the verdict. tvalid gates both the
+   beat counter and the accumulator, so wait states should be invisible to the
+   design; a parser that counted cycles rather than beats would pass every test
+   above and fail this one. *)
+let check_gapped ~name ~gap packet =
+  let model = Ref_model.parse ~table packet in
+  List.iter
+    (fun (w, run) ->
+       incr checks;
+       let rtl = run ~gap packet in
+       if not (Tb.agrees rtl model)
+       then begin
+         incr failures;
+         Printf.printf
+           "FAIL  W=%-2d  %s (gap=%d)\n      model: %s\n      diff:  %s\n"
+           w
+           name
+           gap
+           (Ref_model.to_string model)
+           (Tb.diff rtl model)
+       end)
+    gapped_runners
 
 (* Packets streamed back to back, no reset in between: the verdicts must come
    out in order, one per packet, with no dropped or duplicated pulses. A parser
@@ -155,6 +186,18 @@ let () =
     check ~name:(Printf.sprintf "truncated to %d" len) (Bytes.sub full 0 len)
   done;
   Printf.printf "   %d packets\n\n" !sweep;
+
+  print_endline "-- wait states (idle cycles between beats) --";
+  let gapped = ref 0 in
+  List.iter
+    (fun (name, packet) ->
+       List.iter
+         (fun gap ->
+            incr gapped;
+            check_gapped ~name ~gap packet)
+         [ 1; 2; 5 ])
+    (Packet_gen.corpus ~table);
+  Printf.printf "   %d packet/gap combinations\n\n" !gapped;
 
   print_endline "-- back-to-back streams (no gaps, no reset between packets) --";
   let st2 = Random.State.make [| 0xbeef |] in
