@@ -1,0 +1,7 @@
+# The shell scripts run under WSL; CRLF would break the shebang line.
+# Keep everything LF in the working tree so Linux and Windows agree.
+* text=auto eol=lf
+*.tcl text eol=lf
+*.sh text eol=lf
+*.ml text eol=lf
+*.v text eol=lf
