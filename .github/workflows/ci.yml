@@ -1,0 +1,32 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      # ppx_hardcaml requires OCaml >= 5.1.
+      - uses: ocaml/setup-ocaml@v3
+        with:
+          ocaml-compiler: "5.2"
+
+      - run: opam install . --deps-only --with-test
+
+      - run: opam exec -- dune build
+
+      # The differential test: every packet through the reference model and
+      # through the RTL at five datapath widths, all six verdicts must agree.
+      - run: opam exec -- dune test --force
+
+      # Verilog generation must not silently break either. Deliberately not
+      # diffed against the checked-in rtl/: Hardcaml's emitter output is stable
+      # for a given version but not across versions, so a diff check here would
+      # fail on an unrelated dependency bump rather than on a real regression.
+      - run: opam exec -- dune exec bin/generate.exe -- rtl

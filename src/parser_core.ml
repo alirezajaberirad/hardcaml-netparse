@@ -88,6 +88,24 @@ module Make (Cfg : Config) = struct
 
   let reduce_or = function [] -> gnd | x :: xs -> List.fold_left ( |: ) x xs
 
+  (** Balanced adder tree.
+
+      [List.fold_left ( +: )] over ten words builds a *linear* chain ten adders
+      deep. Pairing and halving instead gives depth ceil(log2 10) = 4. On a
+      carry-chain FPGA that is the whole difference: the first version made the
+      checksum the critical path at every datapath width, which showed up as a
+      near-identical Fmax for 32- and 64-bit variants that otherwise share no
+      logic. *)
+  let rec sum_tree = function
+    | [] -> zero 20
+    | [ x ] -> x
+    | xs ->
+      let rec pair = function
+        | a :: b :: rest -> (a +: b) :: pair rest
+        | rest -> rest
+      in
+      sum_tree (pair xs)
+
   (** Slice packet byte range [off, off+len) out of the header accumulator. *)
   let field acc ~off ~len =
     let high, low = Packet_defs.acc_field_range ~w ~off ~len in
@@ -202,9 +220,7 @@ module Make (Cfg : Config) = struct
         field acc ~off:(Packet_defs.off_ip + (2 * k)) ~len:2)
     in
     let s1_csum_sum =
-      reg
-        ~enable:s1_en
-        (List.fold_left (fun a x -> a +: uresize x 20) (zero 20) ip_words)
+      reg ~enable:s1_en (sum_tree (List.map (fun x -> uresize x 20) ip_words))
     in
 
     (* ---------------------------------------------------------------- *)

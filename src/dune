@@ -1,5 +1,6 @@
 (library
  (name netparse)
+ (public_name netparse)
  (libraries hardcaml)
  (preprocess
   (pps ppx_hardcaml)))
