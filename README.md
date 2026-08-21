@@ -47,6 +47,8 @@ The filter table is likewise an ordinary OCaml list
 ([`src/filter_table.ml`](src/filter_table.ml)) that becomes constant comparators
 in the netlist.
 
+Further reading:
+
 - **[doc/DESIGN.md](doc/DESIGN.md)** — the architecture and the reasoning behind
   it: why the accumulator, how the checksum folds, and what is deliberately out
   of scope.

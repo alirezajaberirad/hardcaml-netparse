@@ -1,0 +1,4 @@
+datapath_bits,beats,acc_bits,lut,ff,fmax_mhz,wns_ns,part
+32,11,352,244,368,205.7,-2.862,xc7a200tfbg484-3
+64,6,384,226,428,206.8,-2.835,xc7a200tfbg484-3
+128,3,384,240,427,213.1,-2.692,xc7a200tfbg484-3
