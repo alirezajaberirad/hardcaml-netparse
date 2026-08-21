@@ -1,0 +1,25 @@
+# OCaml / dune
+_build/
+*.install
+.merlin
+
+# Generated RTL
+rtl/*.v
+
+# Vivado
+syn/vivado/*.jou
+syn/vivado/*.log
+syn/vivado/*.str
+syn/vivado/.Xil/
+syn/vivado/*.cache/
+syn/vivado/*.runs/
+syn/vivado/*.hw/
+syn/vivado/*.sim/
+syn/vivado/*.xpr
+vivado*.jou
+vivado*.log
+.Xil/
+
+# OS
+Thumbs.db
+.DS_Store
