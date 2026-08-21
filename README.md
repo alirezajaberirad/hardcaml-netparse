@@ -58,13 +58,42 @@ Further reading:
 
 ## Results
 
-Post-place-and-route, out-of-context, Xilinx Artix-7.
-
 <!-- RESULTS_TABLE_START -->
-*Populated by `syn/vivado/synth.tcl` — see below.*
-<!-- RESULTS_TABLE_END -->
+Post-place-and-route, out-of-context, `xc7a200tfbg484-3` (Artix-7, speed grade -3).
 
-10 GbE line rate needs 156.25 MHz at a 64-bit datapath; 25 GbE needs 390.6 MHz.
+| Datapath | Header beats | LUT | FF | Fmax | 10 GbE | 25 GbE |
+| ---: | ---: | ---: | ---: | ---: | :---: | :---: |
+| 32-bit | 11 | 244 | 368 | 206 MHz | no | no |
+| 64-bit | 6 | 226 | 428 | 207 MHz | **yes** | no |
+| 128-bit | 3 | 240 | 427 | 213 MHz | **yes** | **yes** |
+| 256-bit | 2 | 266 | 490 | 207 MHz | **yes** | **yes** |
+| 512-bit | 1 | 330 | 329 | 203 MHz | **yes** | **yes** |
+
+Sustaining a line rate needs `rate / datapath_width`: 156 MHz for 10 GbE at 64-bit, 391 MHz for 25 GbE at 64-bit. Artix-7 is a low-cost 28 nm family and the -3 grade is its fastest; the same RTL on an UltraScale+ part would clock considerably higher.
+
+### Finding the critical path — including one wrong turn
+
+Fmax barely moves across a 16x range of datapath widths. That is the useful clue: the limit is **width-independent**, so it lives in a block that is identical at every width rather than in the datapath.
+
+The first guess was the IPv4 checksum's adder tree. It was summing the ten header words with `List.fold_left ( +: )`, which builds a *linear chain ten adders deep* rather than a `ceil(log2 10) = 4` deep tree. Restructuring it did nothing:
+
+| Datapath | Fmax, linear chain | Fmax, balanced tree | Change |
+| ---: | ---: | ---: | ---: |
+| 32-bit | 206.1 MHz | 205.7 MHz | -0.2% |
+| 64-bit | 207.6 MHz | 206.8 MHz | -0.4% |
+| 128-bit | 200.4 MHz | 213.1 MHz | +6.3% |
+| 256-bit | 212.4 MHz | 207.3 MHz | -2.4% |
+| 512-bit | 214.0 MHz | 203.1 MHz | -5.1% |
+| **mean** | **208.1 MHz** | **207.2 MHz** | **-0.4%** |
+
+Mixed signs, a few percent either way, and a mean that does not move: that is run-to-run placement noise, not an improvement. Vivado restructures arithmetic during synthesis, so the shape of the OCaml fold never reached the netlist in the first place. **A difference smaller than the spread between runs is not evidence of anything** — the honest read is "no effect".
+
+So the path got measured instead of guessed, with [`syn/vivado/critpath.tcl`](syn/vivado/critpath.tcl). On the 64-bit variant: **13 logic levels, 4.797 ns**, from `_90_reg[17]` to `_112_reg`. In the generated Verilog `_90` is the 20-bit `s1_csum_sum` register — sliced as `_90[19:16]` and `_90[15:0]`, which is exactly the carry fold — and `_112` drives `err_bad_checksum`.
+
+The limit is therefore **stage 2**: fold, fold again, compare against `0xffff`, then OR into the malformed tree and register. Not stage 1's adder tree, which is precisely why restructuring it changed nothing. The fix is a pipeline register between the fold and the compare, at the cost of one more cycle of latency.
+
+The restructure was kept anyway: it is functionally identical (addition is associative, and a 20-bit accumulator cannot overflow on ten 16-bit inputs, so no intermediate truncates) and it expresses the intent correctly even though this tool would have done it regardless.
+<!-- RESULTS_TABLE_END -->
 
 ## Verification
 
