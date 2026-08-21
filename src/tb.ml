@@ -107,43 +107,42 @@ module Make (Cfg : Parser_core.Config) = struct
 
   let create () = Sim.create P.create
 
-  (** Drive one packet through and return the verdict. Each call re-asserts
-      clear first, so packets are independent and a failure in one cannot
-      cascade into the next. *)
-  let run sim (packet : Bytes.t) =
-    (* Annotated because [result] below also has [valid]/[pass]/[channel]
-       fields, and OCaml would otherwise disambiguate [o.valid] to the
-       last-defined record type rather than to the port interface. *)
-    let i : Bits.t ref P.I.t = Cyclesim.inputs sim in
-    let o : Bits.t ref P.O.t = Cyclesim.outputs sim in
-    let captured = ref no_result in
-    let capture () =
-      if Bits.to_int !(o.valid) = 1 && not !captured.valid
-      then
-        captured
-        := { valid = true
-           ; pass = Bits.to_int !(o.pass) = 1
-           ; channel = Bits.to_int !(o.channel)
-           ; dst_ip = Bits.to_int !(o.dst_ip)
-           ; dst_port = Bits.to_int !(o.dst_port)
-           ; short = Bits.to_int !(o.err_short) = 1
-           ; vlan = Bits.to_int !(o.err_vlan) = 1
-           ; not_ipv4 = Bits.to_int !(o.err_not_ipv4) = 1
-           ; bad_ihl = Bits.to_int !(o.err_bad_ihl) = 1
-           ; not_udp = Bits.to_int !(o.err_not_udp) = 1
-           ; fragment = Bits.to_int !(o.err_fragment) = 1
-           ; bad_checksum = Bits.to_int !(o.err_bad_checksum) = 1
-           }
-    in
-    (* Reset. *)
+  (* The port bindings are annotated because [result] also has
+     [valid]/[pass]/[channel] fields, and OCaml resolves a bare field access to
+     the last-defined matching record type rather than to the port interface. *)
+  let ports sim : Bits.t ref P.I.t * Bits.t ref P.O.t =
+    (Cyclesim.inputs sim, Cyclesim.outputs sim)
+
+  let sample (o : Bits.t ref P.O.t) : result option =
+    if Bits.to_int !(o.valid) = 0
+    then None
+    else
+      Some
+        { valid = true
+        ; pass = Bits.to_int !(o.pass) = 1
+        ; channel = Bits.to_int !(o.channel)
+        ; dst_ip = Bits.to_int !(o.dst_ip)
+        ; dst_port = Bits.to_int !(o.dst_port)
+        ; short = Bits.to_int !(o.err_short) = 1
+        ; vlan = Bits.to_int !(o.err_vlan) = 1
+        ; not_ipv4 = Bits.to_int !(o.err_not_ipv4) = 1
+        ; bad_ihl = Bits.to_int !(o.err_bad_ihl) = 1
+        ; not_udp = Bits.to_int !(o.err_not_udp) = 1
+        ; fragment = Bits.to_int !(o.err_fragment) = 1
+        ; bad_checksum = Bits.to_int !(o.err_bad_checksum) = 1
+        }
+
+  let reset (i : Bits.t ref P.I.t) sim =
     i.clear := Bits.vdd;
     i.tvalid := Bits.gnd;
     i.tlast := Bits.gnd;
     Cyclesim.cycle sim;
     i.clear := Bits.gnd;
-    Cyclesim.cycle sim;
-    (* Stream the packet with no gaps -- an ingress parser must sustain
-       back-to-back beats. *)
+    Cyclesim.cycle sim
+
+  (* Beats are driven with no gaps: an ingress parser has to sustain a
+     continuous stream, because the wire does not stop. *)
+  let drive_packet (i : Bits.t ref P.I.t) (o : Bits.t ref P.O.t) sim ~collect packet =
     List.iter
       (fun (tdata, tkeep, last) ->
          i.tvalid := Bits.vdd;
@@ -151,14 +150,50 @@ module Make (Cfg : Parser_core.Config) = struct
          i.tkeep := tkeep;
          i.tlast := (if last then Bits.vdd else Bits.gnd);
          Cyclesim.cycle sim;
-         capture ())
-      (beats packet);
+         collect (sample o))
+      (beats packet)
+
+  let drain (i : Bits.t ref P.I.t) (o : Bits.t ref P.O.t) sim ~collect =
     i.tvalid := Bits.gnd;
     i.tlast := Bits.gnd;
-    (* Drain the pipeline. *)
     for _ = 1 to P.latency + 3 do
       Cyclesim.cycle sim;
-      capture ()
-    done;
+      collect (sample o)
+    done
+
+  (** One packet, preceded by a reset, so a failure cannot cascade into the
+      next case. *)
+  let run sim (packet : Bytes.t) =
+    let i, o = ports sim in
+    let captured = ref no_result in
+    let collect = function
+      | Some r when not !captured.valid -> captured := r
+      | _ -> ()
+    in
+    reset i sim;
+    drive_packet i o sim ~collect packet;
+    drain i o sim ~collect;
     !captured
+
+  (** Several packets streamed back to back: one reset at the start, then no
+      idle cycles and no clear between packets -- what a real MAC delivers.
+      Returns one verdict per packet, in order.
+
+      This is the case {!run} cannot reach. It exercises the framing handover:
+      the beat counter reloading on tlast, hdr_done releasing in time for the
+      next packet's first beat, and the accumulator's stale contents being
+      shifted out by the incoming header rather than cleared. That last one is
+      only correct because the accumulator is exactly [n_beats * w] bytes wide,
+      so a full header displaces every bit of the previous packet. *)
+  let run_stream sim (packets : Bytes.t list) =
+    let i, o = ports sim in
+    let acc = ref [] in
+    let collect = function
+      | Some r -> acc := r :: !acc
+      | None -> ()
+    in
+    reset i sim;
+    List.iter (drive_packet i o sim ~collect) packets;
+    drain i o sim ~collect;
+    List.rev !acc
 end

@@ -47,6 +47,14 @@ let runners : (int * (Bytes.t -> Tb.result)) list =
   ; (64, (let s = W64.create () in fun p -> W64.run s p))
   ]
 
+let stream_runners : (int * (Bytes.t list -> Tb.result list)) list =
+  [ (4, (let s = W4.create () in fun ps -> W4.run_stream s ps))
+  ; (8, (let s = W8.create () in fun ps -> W8.run_stream s ps))
+  ; (16, (let s = W16.create () in fun ps -> W16.run_stream s ps))
+  ; (32, (let s = W32.create () in fun ps -> W32.run_stream s ps))
+  ; (64, (let s = W64.create () in fun ps -> W64.run_stream s ps))
+  ]
+
 let failures = ref 0
 let checks = ref 0
 
@@ -67,6 +75,45 @@ let check ~name packet =
            (Tb.diff rtl model)
        end)
     runners
+
+(* Packets streamed back to back, no reset in between: the verdicts must come
+   out in order, one per packet, with no dropped or duplicated pulses. A parser
+   that only ever sees isolated packets can hide a framing bug that a real MAC
+   would expose on the first busy microsecond. *)
+let check_stream ~name packets =
+  let models = List.map (Ref_model.parse ~table) packets in
+  List.iter
+    (fun (w, run) ->
+       let rtls = run packets in
+       incr checks;
+       if List.length rtls <> List.length models
+       then begin
+         incr failures;
+         Printf.printf
+           "FAIL  W=%-2d  %s: %d verdicts emitted, %d packets sent\n"
+           w
+           name
+           (List.length rtls)
+           (List.length models)
+       end
+       else
+         List.iteri
+           (fun idx (rtl, model) ->
+              incr checks;
+              if not (Tb.agrees rtl model)
+              then begin
+                incr failures;
+                Printf.printf
+                  "FAIL  W=%-2d  %s [packet %d of %d]\n      model: %s\n      diff:  %s\n"
+                  w
+                  name
+                  idx
+                  (List.length models)
+                  (Ref_model.to_string model)
+                  (Tb.diff rtl model)
+              end)
+           (List.combine rtls models))
+    stream_runners
 
 let () =
   print_endline "hardcaml-netparse differential test";
@@ -108,6 +155,30 @@ let () =
     check ~name:(Printf.sprintf "truncated to %d" len) (Bytes.sub full 0 len)
   done;
   Printf.printf "   %d packets\n\n" !sweep;
+
+  print_endline "-- back-to-back streams (no gaps, no reset between packets) --";
+  let st2 = Random.State.make [| 0xbeef |] in
+  let n_streams = 60 in
+  let streamed = ref 0 in
+  (* A directed stream first: a runt wedged between two good packets is the case
+     where the framing state has to recover without the header ever completing. *)
+  let good = Packet_gen.build { Packet_gen.default with dst_ip = 0xefc00001; dst_port = 15000 } in
+  let runt = Bytes.sub good 0 20 in
+  let bad = Packet_gen.build { Packet_gen.default with corrupt_checksum = true } in
+  check_stream ~name:"good, runt, good" [ good; runt; good ];
+  check_stream ~name:"runt, runt, good" [ runt; runt; good ];
+  check_stream ~name:"good, bad-csum, good" [ good; bad; good ];
+  check_stream ~name:"minimum-length x4"
+    (List.init 4 (fun _ -> Packet_gen.build { Packet_gen.default with payload_len = 0 }));
+  streamed := 4;
+  for k = 1 to n_streams do
+    let n = 2 + Random.State.int st2 6 in
+    incr streamed;
+    check_stream
+      ~name:(Printf.sprintf "random stream #%d" k)
+      (List.init n (fun _ -> Packet_gen.random_good st2 ~table))
+  done;
+  Printf.printf "   %d streams\n\n" !streamed;
 
   Printf.printf "%d checks, %d failures\n" !checks !failures;
   if !failures = 0
