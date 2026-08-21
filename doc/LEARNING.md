@@ -160,8 +160,10 @@ re-read.
 
 A reviewer will look for what is missing. Better that you name it first.
 
-- **No backpressure.** `tready` is never de-asserted. Defensible for an ingress
-  parser (see DESIGN.md §6), but know that it is a choice, not an oversight.
+- **No backpressure.** There is no `tready` port at all — the core is
+  unconditionally ready. Defensible for an ingress parser (see DESIGN.md §6),
+  but know it is a choice, not an oversight, and be ready to say what you would
+  put downstream (a FIFO) if the consumer could stall.
 - **The filter table is compile-time.** Real systems reconfigure rules at
   runtime, which means an AXI4-Lite register interface and a small RAM. The
   compile-time version makes a better *language* argument and a weaker

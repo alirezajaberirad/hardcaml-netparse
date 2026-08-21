@@ -167,9 +167,12 @@ rather than half-built in six directions:
   reassembly needs buffering and per-flow state, which is a different project.
 - **UDP checksum.** Requires the payload, not just the header, so it cannot be done
   from the accumulator alone. The IPv4 *header* checksum is done.
-- **Backpressure.** The parser never de-asserts `tready`. Real MACs cannot be
-  back-pressured anyway — a receive path that stalls drops packets — so an
-  unconditionally-ready design is the honest architecture for an ingress parser.
+- **Backpressure.** There is no `tready` output at all: the core is
+  unconditionally ready by construction, and the ports say so. Real MACs cannot
+  be back-pressured anyway — a receive path that stalls drops packets — so an
+  always-ready ingress parser is the honest architecture rather than a
+  simplification. Anything downstream that *can* stall needs a FIFO between it
+  and this core.
 - **Runt / oversized frames.** A packet shorter than 42 bytes ends before the header
   completes; it is flagged `short` and dropped.
 

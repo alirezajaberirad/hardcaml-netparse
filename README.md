@@ -1,5 +1,7 @@
 # hardcaml-netparse
 
+[![ci](https://github.com/alirezajaberirad/hardcaml-netparse/actions/workflows/ci.yml/badge.svg)](https://github.com/alirezajaberirad/hardcaml-netparse/actions/workflows/ci.yml)
+
 A line-rate Ethernet / IPv4 / UDP packet parser and filter, written in
 [Hardcaml](https://github.com/janestreet/hardcaml) — Jane Street's OCaml
 hardware description library — and synthesized to a Xilinx 7-series FPGA.
@@ -22,6 +24,11 @@ Per packet it emits a verdict: pass or drop, the matched channel, and a
 breakdown of why a packet was rejected (runt, VLAN-tagged, not IPv4, IPv4
 options present, not UDP, fragmented, bad header checksum).
 
+The verdict arrives 3 cycles after the last header beat. There is no `tready`
+output — the core is unconditionally ready and never stalls — so throughput is
+one packet per `ceil(42 / W)` beats regardless of verdict: a rejected packet
+costs exactly as much as an accepted one.
+
 ## Why it is written in Hardcaml
 
 Header fields sit at fixed *byte* offsets, but arrive in *W-byte* beats. At
@@ -40,7 +47,12 @@ The filter table is likewise an ordinary OCaml list
 ([`src/filter_table.ml`](src/filter_table.ml)) that becomes constant comparators
 in the netlist.
 
-Full architecture and the reasoning behind it: **[doc/DESIGN.md](doc/DESIGN.md)**.
+- **[doc/DESIGN.md](doc/DESIGN.md)** — the architecture and the reasoning behind
+  it: why the accumulator, how the checksum folds, and what is deliberately out
+  of scope.
+- **[doc/LEARNING.md](doc/LEARNING.md)** — how the OCaml works, the
+  elaboration-time mental model Hardcaml depends on, and a walkthrough of the
+  one real bug the differential test caught.
 
 ## Results
 
@@ -60,15 +72,23 @@ Two independent implementations are compared on every packet:
   a byte buffer. No hardware concepts; written to be read and trusted.
 - [`src/parser_core.ml`](src/parser_core.ml) — the RTL, simulated beat by beat.
 
-The test bench drives a directed corpus (one packet per rejection reason, plus
-the boundary cases where the header exactly fills or just fails to fill the
-accumulator), 2000 randomised well-formed packets from a fixed seed, and a sweep
-of every payload length that moves the header's end across a beat boundary.
+**12,715 checks, 0 failures.** The test bench drives:
+
+- a directed corpus — one packet per rejection reason, plus the boundary cases
+  where the header exactly fills or just fails to fill the accumulator;
+- 2000 randomised well-formed packets from a fixed seed;
+- a sweep of every payload length that moves the header's end across a beat
+  boundary, and every truncation length from 1 to 42 bytes;
+- **wait states** — idle cycles mid-packet, which must not change the verdict;
+- **back-to-back streams** — packets with no gaps and no reset between them,
+  which must produce exactly one verdict each, in order.
 
 The load-bearing property is **cross-width invariance**: the same packet must
 produce the same verdict at every datapath width. Width is an implementation
 detail, so any behavioural difference is a mis-sliced field — which is exactly
-the bug class the accumulator design exists to prevent.
+the bug class the accumulator design exists to prevent. It earned its keep: see
+[`doc/LEARNING.md` §5](doc/LEARNING.md) for the one real bug it caught and how
+the shape of the failure identified the cause.
 
 ## Layout
 
