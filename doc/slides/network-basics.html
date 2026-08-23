@@ -267,6 +267,24 @@
     text-align: center; font-variant-numeric: tabular-nums;
   }
 
+  /* ---------- field jobs ---------- */
+  .jobs {
+    width: 100%; margin-top: 3vmin; display: grid; gap: .8vmin;
+    grid-template-columns: repeat(auto-fit, minmax(17vmin, 1fr));
+  }
+  .job {
+    border-left: 3px solid var(--line); border-radius: 0 6px 6px 0;
+    background: var(--ink-2); padding: .8vmin 1.2vmin;
+  }
+  .job b { display: block; font-size: clamp(7px, 1.3vmin, 12px); font-weight: 600; }
+  .job span {
+    display: block; font-size: clamp(6.5px, 1.12vmin, 11px);
+    color: var(--text-faint); line-height: 1.32; margin-top: .15vmin;
+  }
+  .job.j-eth { border-left-color: var(--eth); } .job.j-eth b { color: var(--eth); }
+  .job.j-ip  { border-left-color: var(--ip); }  .job.j-ip  b { color: var(--ip); }
+  .job.j-udp { border-left-color: var(--udp); } .job.j-udp b { color: var(--udp); }
+
   /* ---------- chrome ---------- */
   .bar { position: fixed; left: 0; right: 0; bottom: 0; height: 3px; background: var(--ink-3); z-index: 40; }
   .bar i { display: block; height: 100%; background: var(--amber); transition: width .3s ease; }
@@ -589,25 +607,56 @@
         <div class="cell c-eth" style="grid-column: span 6">dst MAC</div>
         <div class="cell c-eth" style="grid-column: span 6">src MAC</div>
         <div class="cell c-eth" style="grid-column: span 2">type</div>
-        <div class="cell c-ip" style="grid-column: span 6">version, length, flags</div>
-        <div class="cell c-ip" style="grid-column: span 2">proto</div>
+        <div class="cell c-ip" style="grid-column: span 1">v</div>
+        <div class="cell c-ip" style="grid-column: span 1">·</div>
+        <div class="cell c-ip" style="grid-column: span 2">len</div>
+        <div class="cell c-ip" style="grid-column: span 2">id</div>
+        <div class="cell c-ip" style="grid-column: span 2">frag</div>
+        <div class="cell c-ip" style="grid-column: span 1">t</div>
+        <div class="cell c-ip" style="grid-column: span 1">p</div>
         <div class="cell c-ip" style="grid-column: span 2">cksum</div>
         <div class="cell c-ip" style="grid-column: span 4">src IP</div>
         <div class="cell c-ip" style="grid-column: span 4">dst IP</div>
         <div class="cell c-udp" style="grid-column: span 2">sport</div>
         <div class="cell c-udp" style="grid-column: span 2">dport</div>
-        <div class="cell c-udp" style="grid-column: span 4">len, cksum</div>
+        <div class="cell c-udp" style="grid-column: span 2">len</div>
+        <div class="cell c-udp" style="grid-column: span 2">cksum</div>
       </div>
       <div class="offsets">
         <div style="grid-column: span 6">0</div><div style="grid-column: span 6">6</div>
-        <div style="grid-column: span 2">12</div><div style="grid-column: span 6">14</div>
-        <div style="grid-column: span 2">23</div><div style="grid-column: span 2">24</div>
+        <div style="grid-column: span 2">12</div>
+        <div style="grid-column: span 1">14</div><div style="grid-column: span 1">15</div>
+        <div style="grid-column: span 2">16</div><div style="grid-column: span 2">18</div>
+        <div style="grid-column: span 2">20</div>
+        <div style="grid-column: span 1">22</div><div style="grid-column: span 1">23</div>
+        <div style="grid-column: span 2">24</div>
         <div style="grid-column: span 4">26</div><div style="grid-column: span 4">30</div>
         <div style="grid-column: span 2">34</div><div style="grid-column: span 2">36</div>
-        <div style="grid-column: span 4">38</div>
+        <div style="grid-column: span 2">38</div><div style="grid-column: span 2">40</div>
       </div>
     </div>
-    <p class="sub">Three envelopes, flattened into 42 bytes, in a fixed order, every single time.</p>
+
+    <div class="jobs">
+      <div class="job j-eth"><b>dst MAC</b><span>the box this hop goes to</span></div>
+      <div class="job j-eth"><b>src MAC</b><span>the box it came from</span></div>
+      <div class="job j-eth"><b>type</b><span>what envelope is inside</span></div>
+      <div class="job j-ip"><b>v</b><span>IPv4, and header length</span></div>
+      <div class="job j-ip"><b>·</b><span>priority hint, mostly ignored</span></div>
+      <div class="job j-ip"><b>len</b><span>size of everything from here</span></div>
+      <div class="job j-ip"><b>id</b><span>which message, if it was split</span></div>
+      <div class="job j-ip"><b>frag</b><span>a piece of a bigger message?</span></div>
+      <div class="job j-ip"><b>t</b><span>hop budget — lost packets die</span></div>
+      <div class="job j-ip"><b>p</b><span>17 = UDP, 6 = TCP</span></div>
+      <div class="job j-ip"><b>cksum</b><span>was the header damaged?</span></div>
+      <div class="job j-ip"><b>src IP</b><span>the machine that sent it</span></div>
+      <div class="job j-ip"><b>dst IP</b><span>the machine or group it is for</span></div>
+      <div class="job j-udp"><b>sport</b><span>which program sent it</span></div>
+      <div class="job j-udp"><b>dport</b><span>which program should get it</span></div>
+      <div class="job j-udp"><b>len</b><span>size of this datagram</span></div>
+      <div class="job j-udp"><b>cksum</b><span>damage check, data included</span></div>
+    </div>
+
+    <p class="sub" style="margin-top: 2.4vmin">Three envelopes flattened into 42 bytes, same order every time &mdash; then the payload they were wrapping.</p>
   </div>
 </section>
 
