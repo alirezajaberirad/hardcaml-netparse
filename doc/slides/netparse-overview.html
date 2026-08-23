@@ -545,6 +545,14 @@
         <div class="end">42</div>
       </div>
     </div>
+    <div class="legend" style="margin-top: 2.4vmin; font-size: clamp(9px, 1.4vmin, 13px)">
+      <span><i class="sw" style="background: var(--eth)"></i> Ethernet &middot; bytes 0&ndash;13</span>
+      <span><i class="sw" style="background: var(--ip)"></i> IPv4 &middot; 14&ndash;33</span>
+      <span><i class="sw" style="background: var(--udp)"></i> UDP &middot; 34&ndash;41</span>
+      <span><i class="sw" style="background: var(--amber)"></i> read by the core</span>
+      <span><i class="sw" style="background: var(--pay)"></i> payload &middot; ignored</span>
+    </div>
+
     <div class="frame-scale">
       <div class="fs-seg fs-hdr" style="flex: 42">42 B</div>
       <div class="fs-seg fs-pay" style="flex: 1472">payload &mdash; the actual market data, up to 1472 bytes</div>

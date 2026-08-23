@@ -277,6 +277,17 @@
     color: var(--amber); font-weight: 600;
   }
 
+  /* ---------- colour key ---------- */
+  .legend {
+    display: flex; flex-wrap: wrap; gap: 2.6vmin; margin-top: 2.4vmin;
+    font-size: clamp(9px, 1.4vmin, 13px); color: var(--text-dim);
+  }
+  .legend span { display: inline-flex; align-items: center; gap: 1vmin; }
+  .sw {
+    width: 1.5vmin; height: 1.5vmin; min-width: 11px; min-height: 11px;
+    border-radius: 3px; flex: none;
+  }
+
   /* ---------- field jobs ---------- */
   .jobs {
     width: 100%; margin-top: 3vmin; display: grid; gap: .8vmin;
@@ -645,6 +656,12 @@
         <div style="grid-column: span 2">38</div><div style="grid-column: span 2">40</div>
         <div class="end">42</div>
       </div>
+    </div>
+
+    <div class="legend">
+      <span><i class="sw" style="background: var(--eth)"></i> Ethernet &mdash; which box, next hop</span>
+      <span><i class="sw" style="background: var(--ip)"></i> IPv4 &mdash; which machine, end to end</span>
+      <span><i class="sw" style="background: var(--udp)"></i> UDP &mdash; which program</span>
     </div>
 
     <div class="jobs">
