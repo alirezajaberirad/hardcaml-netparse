@@ -1,0 +1,660 @@
+<title>Bytes on a Wire</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600&display=swap">
+
+<style>
+  /* Committed single look, matching the netparse-overview deck: a projected
+     surface, not a document, so it does not follow the viewer's theme. */
+  :root {
+    --ink:      #0B111B;
+    --ink-2:    #121B29;
+    --ink-3:    #1A2536;
+    --line:     #26334A;
+    --text:     #EAEEF6;
+    --text-dim: #94A1B8;
+    --text-faint:#5F6C82;
+
+    --amber:    #F0A93C;
+    --amber-dim: rgba(240, 169, 60, .14);
+
+    --eth: #7C90B8;
+    --ip:  #3FB5AF;
+    --udp: #C083A8;
+    --pay: #47536A;
+
+    --pass: #4FBE8B;
+    --drop: #E4735C;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0; background: var(--ink); color: var(--text);
+    font-family: "IBM Plex Mono", ui-monospace, monospace;
+    overflow: hidden;
+  }
+
+  .slide {
+    display: none; position: fixed; inset: 0;
+    padding: 5vmin 6vmin 9vmin;
+    flex-direction: column; justify-content: center; align-items: flex-start;
+  }
+  .slide.active { display: flex; }
+  @media (prefers-reduced-motion: no-preference) {
+    .slide.active { animation: rise .32s ease-out; }
+    @keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  }
+  .slide.center { align-items: center; text-align: center; }
+  .inner { width: 100%; max-width: 1180px; margin: 0 auto; }
+
+  h1, h2 {
+    font-family: Archivo, ui-sans-serif, system-ui, sans-serif;
+    font-weight: 800; letter-spacing: -0.03em; line-height: 1.0;
+    margin: 0; text-wrap: balance;
+  }
+  h1 { font-size: clamp(34px, 7.4vmin, 92px); }
+  h2 { font-size: clamp(24px, 5vmin, 56px); }
+
+  .eyebrow {
+    font-size: clamp(10px, 1.5vmin, 14px); letter-spacing: .22em;
+    text-transform: uppercase; color: var(--amber);
+    margin: 0 0 2.6vmin; font-weight: 500;
+  }
+  .sub {
+    font-size: clamp(13px, 2.05vmin, 20px); color: var(--text-dim);
+    margin: 3.4vmin 0 0; max-width: 52ch; line-height: 1.55;
+  }
+  .slide.center .sub { margin-left: auto; margin-right: auto; }
+  .amber { color: var(--amber); }
+
+  .arrow { font-size: clamp(18px, 3.4vmin, 34px); color: var(--text-faint); flex: none; }
+
+  /* ---------- generic node ---------- */
+  .node {
+    border: 2px solid var(--line); border-radius: 12px; background: var(--ink-2);
+    padding: 2.4vmin 2vmin; text-align: center; flex: none;
+  }
+  .node.hot { border-color: var(--amber); background: var(--amber-dim); }
+  .node .t { font-family: Archivo, sans-serif; font-weight: 700; font-size: clamp(11px, 2vmin, 19px); }
+  .node .d { font-size: clamp(8px, 1.35vmin, 13px); color: var(--text-dim); margin-top: .6vmin; }
+
+  .row { display: flex; align-items: center; gap: 2.4vmin; width: 100%; margin-top: 5vmin; flex-wrap: wrap; }
+  .row.tight { gap: 1.6vmin; }
+
+  .wire { flex: 1; min-width: 6vmin; height: 2px; background: var(--line); }
+
+  /* ---------- shared medium ---------- */
+  .bus { width: 100%; margin-top: 5vmin; }
+  .busline { height: 3px; background: var(--line); border-radius: 2px; }
+  .drops { display: flex; justify-content: space-around; margin-top: -1px; }
+  .drop-leg { width: 2px; height: 4vmin; background: var(--line); margin: 0 auto; }
+  .hosts { display: flex; justify-content: space-around; gap: 1.6vmin; }
+  .host {
+    border: 1px solid var(--line); border-radius: 9px; background: var(--ink-2);
+    padding: 1.4vmin 1.6vmin; font-size: clamp(8px, 1.4vmin, 13px);
+    color: var(--text-dim); text-align: center; flex: 1; max-width: 20vmin;
+  }
+  .host.hot { border-color: var(--amber); color: var(--amber); background: var(--amber-dim); }
+
+  /* ---------- nested envelopes ---------- */
+  .env {
+    border-radius: 12px; padding: 3vmin;
+    display: flex; flex-direction: column; gap: 1.6vmin;
+  }
+  .env .cap {
+    font-size: clamp(9px, 1.5vmin, 14px); letter-spacing: .14em;
+    text-transform: uppercase; font-weight: 600;
+  }
+  .env-eth { background: rgba(124,144,184,.17); border: 2px solid var(--eth); }
+  .env-eth > .cap { color: var(--eth); }
+  .env-ip  { background: rgba(63,181,175,.15); border: 2px solid var(--ip); }
+  .env-ip  > .cap { color: var(--ip); }
+  .env-udp { background: rgba(192,131,168,.15); border: 2px solid var(--udp); }
+  .env-udp > .cap { color: var(--udp); }
+  .env-pay {
+    background: var(--amber-dim); border: 2px solid var(--amber);
+    border-radius: 10px; padding: 3vmin 2vmin; text-align: center;
+    font-family: Archivo, sans-serif; font-weight: 700;
+    font-size: clamp(13px, 2.6vmin, 26px); color: var(--amber);
+  }
+
+  /* ---------- question grid ---------- */
+  .qgrid { width: 100%; margin-top: 4vmin; display: grid; gap: 1.4vmin; }
+  .q {
+    display: grid; grid-template-columns: 12vmin 1fr auto; gap: 2.4vmin;
+    align-items: center;
+    border: 1px solid var(--line); border-left: 4px solid var(--line);
+    border-radius: 0 10px 10px 0; background: var(--ink-2);
+    padding: 2vmin 2.4vmin;
+  }
+  .q .layer { font-weight: 600; font-size: clamp(10px, 1.75vmin, 17px); }
+  .q .ask { font-size: clamp(10px, 1.85vmin, 18px); color: var(--text); }
+  .q .ans {
+    font-size: clamp(9px, 1.5vmin, 14px); color: var(--text-faint);
+    text-align: right; white-space: nowrap;
+  }
+  .q.l-eth { border-left-color: var(--eth); } .q.l-eth .layer { color: var(--eth); }
+  .q.l-ip  { border-left-color: var(--ip); }  .q.l-ip  .layer { color: var(--ip); }
+  .q.l-udp { border-left-color: var(--udp); } .q.l-udp .layer { color: var(--udp); }
+  .q.l-pay { border-left-color: var(--amber); } .q.l-pay .layer { color: var(--amber); }
+
+  /* ---------- address chips ---------- */
+  .addr {
+    display: flex; gap: 3px; justify-content: center; margin-top: 4vmin; flex-wrap: wrap;
+  }
+  .oct {
+    border-radius: 5px; padding: 2vmin 2.2vmin;
+    font-size: clamp(12px, 2.6vmin, 26px); font-weight: 600; color: #08101C;
+  }
+  .oct.e { background: var(--eth); }
+  .oct.i { background: var(--ip); }
+
+  /* ---------- hop diagram ---------- */
+  .hops { width: 100%; margin-top: 4vmin; display: grid; gap: 2.4vmin; }
+  .hopline { display: flex; align-items: center; gap: 1.2vmin; flex-wrap: nowrap; overflow-x: auto; }
+  .hopnode {
+    border: 1px solid var(--line); border-radius: 9px; background: var(--ink-2);
+    padding: 1.6vmin 1.4vmin; text-align: center; flex: none; min-width: 15vmin;
+    font-size: clamp(8px, 1.4vmin, 13px);
+  }
+  .hopnode.end { border-color: var(--amber); background: var(--amber-dim); color: var(--amber); }
+  .seg-lbl {
+    flex: none; font-size: clamp(7px, 1.2vmin, 11px);
+    text-align: center; min-width: 9vmin; line-height: 1.35;
+  }
+  .seg-lbl.mac { color: var(--eth); }
+  .band {
+    border-radius: 8px; padding: 1.6vmin 2vmin;
+    font-size: clamp(9px, 1.5vmin, 14px); text-align: center;
+  }
+  .band.ip { background: rgba(63,181,175,.15); border: 1px solid var(--ip); color: var(--ip); }
+  .band.mac { background: rgba(124,144,184,.14); border: 1px solid var(--eth); color: var(--eth); }
+
+  /* ---------- ports ---------- */
+  .machine {
+    border: 2px solid var(--line); border-radius: 14px; background: var(--ink-2);
+    padding: 2.6vmin; flex: 1; min-width: 40vmin;
+  }
+  .machine .mt { font-size: clamp(9px, 1.5vmin, 14px); color: var(--text-faint); margin-bottom: 2vmin; letter-spacing: .12em; text-transform: uppercase; }
+  .apps { display: grid; gap: 1.2vmin; }
+  .app {
+    display: flex; justify-content: space-between; align-items: center;
+    border: 1px solid var(--line); border-radius: 8px; background: var(--ink-3);
+    padding: 1.4vmin 2vmin; font-size: clamp(9px, 1.6vmin, 15px);
+    color: var(--text-dim);
+  }
+  .app.hot { border-color: var(--pass); color: var(--text); background: rgba(79,190,139,.12); }
+  .app .p { color: var(--amber); font-weight: 600; }
+
+  /* ---------- two column compare ---------- */
+  .cmp { display: grid; gap: 3vmin; width: 100%; margin-top: 4vmin; }
+  @media (min-width: 900px) { .cmp { grid-template-columns: 1fr 1fr; } }
+  .panel {
+    border: 1px solid var(--line); border-radius: 12px; background: var(--ink-2);
+    padding: 3vmin 2.6vmin;
+  }
+  .panel.good { border-color: var(--pass); }
+  .panel .pt {
+    font-family: Archivo, sans-serif; font-weight: 800;
+    font-size: clamp(16px, 3vmin, 30px); margin-bottom: 2vmin;
+  }
+  .steps { display: grid; gap: 1vmin; }
+  .step {
+    font-size: clamp(9px, 1.55vmin, 15px); color: var(--text-dim);
+    padding: 1.1vmin 1.6vmin; border-radius: 7px; background: var(--ink-3);
+  }
+  .step.x { color: var(--drop); text-decoration: line-through; opacity: .75; }
+
+  /* ---------- cast diagram ---------- */
+  .cast { display: grid; gap: 3vmin; width: 100%; margin-top: 4vmin; }
+  @media (min-width: 900px) { .cast { grid-template-columns: 1fr 1fr; } }
+  .castbox { border: 1px solid var(--line); border-radius: 12px; background: var(--ink-2); padding: 2.6vmin; }
+  .castbox .ct { font-size: clamp(10px, 1.7vmin, 16px); color: var(--amber); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 2.4vmin; }
+  .castrow { display: flex; align-items: center; gap: 1.6vmin; }
+  .src {
+    border: 2px solid var(--amber); border-radius: 9px; background: var(--amber-dim);
+    padding: 1.6vmin 1.2vmin; font-size: clamp(8px, 1.4vmin, 13px); color: var(--amber); flex: none;
+  }
+  .streams { flex: 1; display: grid; gap: .8vmin; }
+  .stream { display: flex; align-items: center; gap: 1vmin; }
+  .pipe-line { flex: 1; height: 2px; background: var(--line); }
+  .pipe-line.on { background: var(--amber); }
+  .rcv {
+    border: 1px solid var(--line); border-radius: 6px; padding: .8vmin 1.2vmin;
+    font-size: clamp(7px, 1.25vmin, 12px); color: var(--text-dim); flex: none; min-width: 9vmin; text-align: center;
+  }
+  .copies { font-size: clamp(9px, 1.5vmin, 14px); margin-top: 2.4vmin; }
+
+  /* ---------- checksum ---------- */
+  .sum { width: 100%; margin-top: 4vmin; display: grid; gap: 1.4vmin; justify-items: center; }
+  .words { display: flex; gap: 4px; flex-wrap: wrap; justify-content: center; }
+  .word {
+    background: var(--ip); color: #08101C; border-radius: 5px;
+    padding: 1.4vmin 1.4vmin; font-size: clamp(9px, 1.6vmin, 15px); font-weight: 600;
+  }
+  .sumline { font-size: clamp(11px, 2.2vmin, 22px); font-weight: 600; }
+
+  /* ---------- wire budget ---------- */
+  .budget, .budget-key {
+    display: flex; gap: 3px; width: 100%; max-width: 800px;
+    margin-left: auto; margin-right: auto;
+  }
+  .budget { margin-top: 4vmin; }
+  .seg {
+    height: 5.4vmin; min-height: 32px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(9px, 1.6vmin, 15px); font-weight: 600; color: #08101C;
+  }
+  .s-pre { background: var(--udp); }
+  .s-frm { background: var(--amber); }
+  .s-gap { background: var(--pay); color: var(--text-dim); }
+  .budget-key { margin-top: 1.3vmin; font-size: clamp(8px, 1.25vmin, 12px); color: var(--text-faint); line-height: 1.35; }
+  .budget-key span { text-align: center; }
+
+  /* ---------- byte map ---------- */
+  .scroller { width: 100%; overflow-x: auto; }
+  .ruler { display: grid; grid-template-columns: repeat(42, 1fr); gap: 2px; min-width: 620px; margin-top: 4vmin; }
+  .cell {
+    height: 8vmin; min-height: 42px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(8px, 1.35vmin, 13px); color: #08101C; font-weight: 600;
+  }
+  .c-eth { background: var(--eth); } .c-ip { background: var(--ip); } .c-udp { background: var(--udp); }
+  .offsets {
+    display: grid; grid-template-columns: repeat(42, 1fr); gap: 2px; min-width: 620px;
+    margin-top: 1vmin; font-size: clamp(7px, 1.15vmin, 11px); color: var(--text-faint);
+    text-align: center; font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- chrome ---------- */
+  .bar { position: fixed; left: 0; right: 0; bottom: 0; height: 3px; background: var(--ink-3); z-index: 40; }
+  .bar i { display: block; height: 100%; background: var(--amber); transition: width .3s ease; }
+  .nav { position: fixed; right: 3vmin; bottom: 3vmin; z-index: 50; display: flex; align-items: center; gap: 1.4vmin; }
+  .nav button {
+    width: 5.4vmin; height: 5.4vmin; min-width: 34px; min-height: 34px;
+    border-radius: 50%; border: 1px solid var(--line); background: var(--ink-2);
+    color: var(--text); font-size: clamp(13px, 2vmin, 18px); cursor: pointer;
+    line-height: 1; display: flex; align-items: center; justify-content: center;
+  }
+  .nav button:hover { border-color: var(--amber); color: var(--amber); }
+  .nav button:focus-visible { outline: 2px solid var(--amber); outline-offset: 2px; }
+  .count { font-size: clamp(10px, 1.5vmin, 14px); color: var(--text-faint); font-variant-numeric: tabular-nums; min-width: 6ch; text-align: right; }
+  .hint { position: fixed; left: 3vmin; bottom: 3vmin; z-index: 50; font-size: clamp(9px, 1.3vmin, 12px); color: var(--text-faint); }
+</style>
+
+<!-- 1 -->
+<section class="slide center active">
+  <div class="inner">
+    <p class="eyebrow">networking from zero</p>
+    <h1>Bytes on a Wire</h1>
+    <p class="sub">What a network packet actually is — before any of the FPGA part matters.</p>
+  </div>
+</section>
+
+<!-- 2 -->
+<section class="slide">
+  <div class="inner">
+    <h2>You want to send something.</h2>
+    <div class="row">
+      <div class="node"><div class="t">YOUR MACHINE</div></div>
+      <div class="wire"></div>
+      <div class="node hot"><div class="t">"hello"</div><div class="d">the message</div></div>
+      <div class="wire"></div>
+      <div class="node"><div class="t">THEIR MACHINE</div></div>
+    </div>
+    <p class="sub">A wire can only carry voltage changes. Everything below is the machinery that turns that into "this message, for that machine, for that program".</p>
+  </div>
+</section>
+
+<!-- 3 -->
+<section class="slide">
+  <div class="inner">
+    <h2>But the wire is shared.</h2>
+    <div class="bus">
+      <div class="busline"></div>
+      <div class="drops">
+        <div><div class="drop-leg"></div></div><div><div class="drop-leg"></div></div>
+        <div><div class="drop-leg"></div></div><div><div class="drop-leg"></div></div>
+        <div><div class="drop-leg"></div></div>
+      </div>
+      <div class="hosts">
+        <div class="host">machine A</div>
+        <div class="host hot">you</div>
+        <div class="host">machine C</div>
+        <div class="host">machine D</div>
+        <div class="host">machine E</div>
+      </div>
+    </div>
+    <p class="sub">Everyone's traffic goes past everyone. So every message has to carry <span class="amber">who it is for</span> — and that is what a header is.</p>
+  </div>
+</section>
+
+<!-- 4 -->
+<section class="slide">
+  <div class="inner">
+    <h2>A packet is envelopes inside envelopes.</h2>
+    <div class="env env-eth" style="margin-top: 4vmin">
+      <div class="cap">Ethernet — for the machine next door</div>
+      <div class="env env-ip">
+        <div class="cap">IP — for the machine across the world</div>
+        <div class="env env-udp">
+          <div class="cap">UDP — for the program on it</div>
+          <div class="env-pay">your data</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 5 -->
+<section class="slide">
+  <div class="inner">
+    <h2>Each envelope answers one question.</h2>
+    <div class="qgrid">
+      <div class="q l-eth">
+        <span class="layer">Ethernet</span>
+        <span class="ask">Which machine on <em>this cable</em>?</span>
+        <span class="ans">MAC address · 6 bytes</span>
+      </div>
+      <div class="q l-ip">
+        <span class="layer">IPv4</span>
+        <span class="ask">Which machine <em>anywhere</em>?</span>
+        <span class="ans">IP address · 4 bytes</span>
+      </div>
+      <div class="q l-udp">
+        <span class="layer">UDP</span>
+        <span class="ask">Which <em>program</em> on that machine?</span>
+        <span class="ans">port · 2 bytes</span>
+      </div>
+      <div class="q l-pay">
+        <span class="layer">Payload</span>
+        <span class="ask">The thing you actually wanted to send.</span>
+        <span class="ans">the rest</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 6 -->
+<section class="slide center">
+  <div class="inner">
+    <p class="eyebrow">Ethernet address — burned into the network chip</p>
+    <div class="addr">
+      <span class="oct e">00</span><span class="oct e">11</span><span class="oct e">22</span>
+      <span class="oct e">33</span><span class="oct e">44</span><span class="oct e">55</span>
+    </div>
+    <p class="sub">A <span class="amber">MAC address</span>. Fixed at the factory, unique in the world — but only meaningful to machines on the same local wire. It cannot get you across the internet.</p>
+  </div>
+</section>
+
+<!-- 7 -->
+<section class="slide center">
+  <div class="inner">
+    <p class="eyebrow">IP address — assigned, and routable</p>
+    <div class="addr">
+      <span class="oct i">239</span><span class="oct i">192</span><span class="oct i">0</span><span class="oct i">2</span>
+    </div>
+    <p class="sub">An <span class="amber">IP address</span>. Four bytes, handed out rather than burned in. This one <em>can</em> cross the planet, because routers know how to forward it.</p>
+  </div>
+</section>
+
+<!-- 8 -->
+<section class="slide">
+  <div class="inner">
+    <h2>MAC changes every hop. IP never does.</h2>
+    <div class="hops">
+      <div class="hopline">
+        <div class="hopnode end">you</div>
+        <div class="seg-lbl mac">MAC<br>you→R1</div>
+        <div class="hopnode">router 1</div>
+        <div class="seg-lbl mac">MAC<br>R1→R2</div>
+        <div class="hopnode">router 2</div>
+        <div class="seg-lbl mac">MAC<br>R2→them</div>
+        <div class="hopnode end">them</div>
+      </div>
+      <div class="band mac">Ethernet header — rewritten at every single hop</div>
+      <div class="band ip">IP header — identical from end to end</div>
+    </div>
+    <p class="sub">IP is <span class="amber">the destination</span>. MAC is <span class="amber">the next step</span>. That is the whole difference, and it is why there are two address layers instead of one.</p>
+  </div>
+</section>
+
+<!-- 9 -->
+<section class="slide">
+  <div class="inner">
+    <h2>A port picks the program.</h2>
+    <div class="row">
+      <div class="node hot" style="min-width: 24vmin">
+        <div class="t">:15001</div>
+        <div class="d">arriving packet</div>
+      </div>
+      <div class="arrow">→</div>
+      <div class="machine">
+        <div class="mt">one machine, 239.192.0.2</div>
+        <div class="apps">
+          <div class="app"><span>web server</span><span class="p">port 80</span></div>
+          <div class="app hot"><span>market data handler</span><span class="p">port 15001</span></div>
+          <div class="app"><span>ssh</span><span class="p">port 22</span></div>
+        </div>
+      </div>
+    </div>
+    <p class="sub">One machine runs many programs. The IP address gets the packet to the machine; the port gets it to the right program.</p>
+  </div>
+</section>
+
+<!-- 10 -->
+<section class="slide">
+  <div class="inner">
+    <h2>Two ways to send it.</h2>
+    <div class="cmp">
+      <div class="panel">
+        <div class="pt">TCP</div>
+        <div class="steps">
+          <div class="step">1 · are you there?</div>
+          <div class="step">2 · yes, I am there</div>
+          <div class="step">3 · here is packet #1</div>
+          <div class="step">4 · got #1</div>
+          <div class="step">5 · #2 never arrived → send it again</div>
+        </div>
+      </div>
+      <div class="panel good">
+        <div class="pt">UDP</div>
+        <div class="steps">
+          <div class="step">1 · here is a packet</div>
+        </div>
+        <p class="sub" style="margin-top: 2.4vmin; font-size: clamp(9px,1.5vmin,14px)">No setup. No acknowledgement. No retry. No ordering. If it is lost, it is lost.</p>
+      </div>
+    </div>
+    <p class="sub">TCP guarantees delivery. It buys that with round trips.</p>
+  </div>
+</section>
+
+<!-- 11 -->
+<section class="slide center">
+  <div class="inner">
+    <p class="eyebrow">why market data is UDP</p>
+    <h2>A resent price is a <span class="amber">wrong</span> price.</h2>
+    <div class="cmp" style="max-width: 700px; margin-left: auto; margin-right: auto">
+      <div class="panel">
+        <div class="steps">
+          <div class="step x">retransmit: AAPL 187.42</div>
+          <div class="step" style="color: var(--text-faint)">arrives 3 ms late</div>
+        </div>
+      </div>
+      <div class="panel good">
+        <div class="steps">
+          <div class="step" style="color: var(--pass)">current: AAPL 187.51</div>
+          <div class="step" style="color: var(--text-faint)">already superseded</div>
+        </div>
+      </div>
+    </div>
+    <p class="sub">By the time TCP could recover a lost packet, the market has moved. Speed is worth more than completeness.</p>
+  </div>
+</section>
+
+<!-- 12 -->
+<section class="slide">
+  <div class="inner">
+    <h2>One sender, thousands of listeners.</h2>
+    <div class="cast">
+      <div class="castbox">
+        <div class="ct">unicast</div>
+        <div class="castrow">
+          <div class="src">exchange</div>
+          <div class="streams">
+            <div class="stream"><div class="pipe-line on"></div><div class="rcv">firm A</div></div>
+            <div class="stream"><div class="pipe-line on"></div><div class="rcv">firm B</div></div>
+            <div class="stream"><div class="pipe-line on"></div><div class="rcv">firm C</div></div>
+          </div>
+        </div>
+        <div class="copies" style="color: var(--drop)">3 receivers → 3 copies sent</div>
+      </div>
+      <div class="castbox">
+        <div class="ct">multicast</div>
+        <div class="castrow">
+          <div class="src">exchange</div>
+          <div class="streams">
+            <div class="stream"><div class="pipe-line on"></div><div class="rcv">firm A</div></div>
+            <div class="stream"><div class="pipe-line on"></div><div class="rcv">firm B</div></div>
+            <div class="stream"><div class="pipe-line on"></div><div class="rcv">firm C</div></div>
+          </div>
+        </div>
+        <div class="copies" style="color: var(--pass)">3 receivers → <strong>1 copy sent</strong></div>
+      </div>
+    </div>
+    <p class="sub">The exchange sends each update <em>once</em>, to a group address like <span class="amber">239.192.0.2</span>. The network duplicates it. Everyone gets the same bytes at the same moment — which is also what makes it fair.</p>
+  </div>
+</section>
+
+<!-- 13 -->
+<section class="slide center">
+  <div class="inner">
+    <h2>Was it damaged in transit?</h2>
+    <div class="sum">
+      <div class="words">
+        <span class="word">4500</span><span class="word">003C</span><span class="word">1234</span>
+        <span class="word">4000</span><span class="word">4011</span><span class="word">B1E6</span>
+        <span class="word">C0A8</span><span class="word">0101</span><span class="word">EFC0</span>
+        <span class="word">0002</span>
+      </div>
+      <div class="sumline" style="color: var(--text-faint)">add all ten together, fold the carries</div>
+      <div class="sumline" style="color: var(--pass)">= FFFF &nbsp;→&nbsp; intact</div>
+    </div>
+    <p class="sub">The <span class="amber">checksum</span> is arithmetic over the header. One flipped bit anywhere and the sum stops coming out right — so the packet gets thrown away instead of believed.</p>
+  </div>
+</section>
+
+<!-- 14 -->
+<section class="slide">
+  <div class="inner">
+    <h2>What actually goes down the wire.</h2>
+    <div class="budget">
+      <div class="seg s-pre" style="flex: 8">8</div>
+      <div class="seg s-frm" style="flex: 64">64</div>
+      <div class="seg s-gap" style="flex: 12">12</div>
+    </div>
+    <div class="budget-key">
+      <span style="flex: 8">preamble<br>+ SFD</span>
+      <span style="flex: 64">the frame — headers + data</span>
+      <span style="flex: 12">interframe<br>gap</span>
+    </div>
+    <div class="qgrid" style="margin-top: 4vmin">
+      <div class="q l-udp">
+        <span class="layer">preamble</span>
+        <span class="ask">101010… so the receiver can lock onto your clock</span>
+        <span class="ans">there is no clock wire</span>
+      </div>
+      <div class="q l-pay">
+        <span class="layer">frame</span>
+        <span class="ask">The envelopes. Never smaller than 64 bytes.</span>
+        <span class="ans">a 1980s collision rule</span>
+      </div>
+      <div class="q l-eth">
+        <span class="layer">gap</span>
+        <span class="ask">Mandatory silence before the next one.</span>
+        <span class="ans">96 bit-times</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 15 -->
+<section class="slide">
+  <div class="inner">
+    <h2>So this is now readable.</h2>
+    <div class="scroller">
+      <div class="ruler">
+        <div class="cell c-eth" style="grid-column: span 6">dst MAC</div>
+        <div class="cell c-eth" style="grid-column: span 6">src MAC</div>
+        <div class="cell c-eth" style="grid-column: span 2">type</div>
+        <div class="cell c-ip" style="grid-column: span 6">version, length, flags</div>
+        <div class="cell c-ip" style="grid-column: span 2">proto</div>
+        <div class="cell c-ip" style="grid-column: span 2">cksum</div>
+        <div class="cell c-ip" style="grid-column: span 4">src IP</div>
+        <div class="cell c-ip" style="grid-column: span 4">dst IP</div>
+        <div class="cell c-udp" style="grid-column: span 2">sport</div>
+        <div class="cell c-udp" style="grid-column: span 2">dport</div>
+        <div class="cell c-udp" style="grid-column: span 4">len, cksum</div>
+      </div>
+      <div class="offsets">
+        <div style="grid-column: span 6">0</div><div style="grid-column: span 6">6</div>
+        <div style="grid-column: span 2">12</div><div style="grid-column: span 6">14</div>
+        <div style="grid-column: span 2">23</div><div style="grid-column: span 2">24</div>
+        <div style="grid-column: span 4">26</div><div style="grid-column: span 4">30</div>
+        <div style="grid-column: span 2">34</div><div style="grid-column: span 2">36</div>
+        <div style="grid-column: span 4">38</div>
+      </div>
+    </div>
+    <p class="sub">Three envelopes, flattened into 42 bytes, in a fixed order, every single time.</p>
+  </div>
+</section>
+
+<!-- 16 -->
+<section class="slide center">
+  <div class="inner">
+    <p class="eyebrow">next</p>
+    <h1>Now build the<br>thing that reads it.</h1>
+    <p class="sub">Deck two: why 42 bytes is hard to parse at 14.9 million packets per second — and what the FPGA does about it.</p>
+  </div>
+</section>
+
+<div class="bar"><i id="prog"></i></div>
+<div class="hint">← → to navigate</div>
+<div class="nav">
+  <span class="count" id="count"></span>
+  <button id="prev" aria-label="Previous slide">←</button>
+  <button id="next" aria-label="Next slide">→</button>
+</div>
+
+<script>
+  (function () {
+    var slides = Array.prototype.slice.call(document.querySelectorAll(".slide"));
+    var i = 0;
+
+    function show(n) {
+      i = Math.max(0, Math.min(slides.length - 1, n));
+      slides.forEach(function (s, k) { s.classList.toggle("active", k === i); });
+      document.getElementById("count").textContent = (i + 1) + " / " + slides.length;
+      document.getElementById("prog").style.width = ((i + 1) / slides.length * 100) + "%";
+    }
+
+    document.getElementById("next").addEventListener("click", function (e) { e.stopPropagation(); show(i + 1); });
+    document.getElementById("prev").addEventListener("click", function (e) { e.stopPropagation(); show(i - 1); });
+
+    window.addEventListener("keydown", function (e) {
+      if (e.key === "ArrowRight" || e.key === "ArrowDown" || e.key === " " || e.key === "PageDown") { e.preventDefault(); show(i + 1); }
+      else if (e.key === "ArrowLeft" || e.key === "ArrowUp" || e.key === "PageUp") { e.preventDefault(); show(i - 1); }
+      else if (e.key === "Home") { show(0); }
+      else if (e.key === "End") { show(slides.length - 1); }
+    });
+
+    document.addEventListener("click", function (e) {
+      if (e.target.closest(".nav") || e.target.closest(".scroller")) return;
+      show(e.clientX > window.innerWidth * 0.35 ? i + 1 : i - 1);
+    });
+
+    show(0);
+    window.focus();
+  })();
+</script>
