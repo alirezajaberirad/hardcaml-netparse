@@ -352,6 +352,40 @@
   }
   .pstage .ds { font-size: clamp(10px, 1.6vmin, 15px); color: var(--text-dim); line-height: 1.5; }
 
+  /* ---------- handshake waveform ---------- */
+  .wave { width: 100%; display: grid; gap: 1.1vmin; margin-top: 2.4vmin; }
+  .wrow { display: flex; align-items: center; gap: 1.4vmin; }
+  .wlabel {
+    width: 11vmin; min-width: 58px; flex: none; text-align: right;
+    font-size: clamp(7.5px, 1.3vmin, 12px); color: var(--text-dim);
+  }
+  .wcells { display: flex; gap: 3px; flex: 1; }
+  .wc {
+    flex: 1; height: 3.2vmin; min-height: 20px; border-radius: 3px;
+    border: 1px solid var(--line); background: var(--ink-3);
+  }
+  .wc.hi { background: var(--amber); border-color: var(--amber); }
+  .wc.tied { background: var(--pass); border-color: var(--pass); }
+  .wc.mark {
+    background: transparent; border: none;
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(9px, 1.7vmin, 16px); font-weight: 700; color: var(--pass);
+  }
+  .wc.mark.stall { color: var(--drop); }
+  .wdef {
+    width: 100%; margin-top: 3.4vmin; display: grid; gap: 1.1vmin;
+    grid-template-columns: repeat(auto-fit, minmax(26vmin, 1fr));
+  }
+  .wd {
+    border-left: 3px solid var(--amber); border-radius: 0 8px 8px 0;
+    background: var(--ink-2); padding: 1.5vmin 1.8vmin;
+  }
+  .wd b { display: block; font-size: clamp(9px, 1.55vmin, 15px); color: var(--amber); }
+  .wd span {
+    display: block; font-size: clamp(8px, 1.3vmin, 12px);
+    color: var(--text-dim); margin-top: .3vmin; line-height: 1.4;
+  }
+
   /* ---------- fan out ---------- */
   .fan { display: flex; align-items: center; gap: 3vmin; margin-top: 5vmin; width: 100%; flex-wrap: wrap; }
   .srcnode {
@@ -731,7 +765,63 @@
       </div>
     </div>
 
-    <p class="sub">At 156.25 MHz, one cycle is <span style="color: var(--amber)">6.4 ns</span>. And no <span style="color:var(--amber)">tready</span> — the core can never say "wait", because the wire never does.</p>
+    <p class="sub">At 156.25 MHz, one cycle is <span style="color: var(--amber)">6.4 ns</span>.</p>
+  </div>
+</section>
+
+<!-- 10b ........................................................... -->
+<section class="slide">
+  <div class="inner">
+    <h2>The brake pedal that isn't there.</h2>
+
+    <div class="wdef">
+      <div class="wd"><b>tvalid</b><span>sender: "there is data on the bus this cycle"</span></div>
+      <div class="wd"><b>tready</b><span>receiver: "I can accept it this cycle"</span></div>
+      <div class="wd"><b>a byte moves</b><span>only on a cycle where <em>both</em> are high</span></div>
+    </div>
+
+    <div class="two" style="margin-top: 3.4vmin">
+      <div class="panel">
+        <div class="ttl">any normal AXI4-Stream block</div>
+        <div class="wave">
+          <div class="wrow"><span class="wlabel">tvalid</span><div class="wcells">
+            <i class="wc hi"></i><i class="wc hi"></i><i class="wc hi"></i><i class="wc hi"></i>
+            <i class="wc hi"></i><i class="wc hi"></i><i class="wc hi"></i><i class="wc hi"></i>
+          </div></div>
+          <div class="wrow"><span class="wlabel">tready</span><div class="wcells">
+            <i class="wc hi"></i><i class="wc hi"></i><i class="wc"></i><i class="wc"></i>
+            <i class="wc hi"></i><i class="wc hi"></i><i class="wc hi"></i><i class="wc hi"></i>
+          </div></div>
+          <div class="wrow"><span class="wlabel">moved?</span><div class="wcells">
+            <i class="wc mark">✓</i><i class="wc mark">✓</i>
+            <i class="wc mark stall">✕</i><i class="wc mark stall">✕</i>
+            <i class="wc mark">✓</i><i class="wc mark">✓</i><i class="wc mark">✓</i><i class="wc mark">✓</i>
+          </div></div>
+        </div>
+        <div class="verdict" style="border-left-color: var(--drop)">Receiver drops tready → sender must hold and wait.</div>
+      </div>
+
+      <div class="panel">
+        <div class="ttl">this core</div>
+        <div class="wave">
+          <div class="wrow"><span class="wlabel">tvalid</span><div class="wcells">
+            <i class="wc hi"></i><i class="wc hi"></i><i class="wc hi"></i><i class="wc hi"></i>
+            <i class="wc hi"></i><i class="wc hi"></i><i class="wc hi"></i><i class="wc hi"></i>
+          </div></div>
+          <div class="wrow"><span class="wlabel">tready</span><div class="wcells">
+            <i class="wc tied"></i><i class="wc tied"></i><i class="wc tied"></i><i class="wc tied"></i>
+            <i class="wc tied"></i><i class="wc tied"></i><i class="wc tied"></i><i class="wc tied"></i>
+          </div></div>
+          <div class="wrow"><span class="wlabel">moved?</span><div class="wcells">
+            <i class="wc mark">✓</i><i class="wc mark">✓</i><i class="wc mark">✓</i><i class="wc mark">✓</i>
+            <i class="wc mark">✓</i><i class="wc mark">✓</i><i class="wc mark">✓</i><i class="wc mark">✓</i>
+          </div></div>
+        </div>
+        <div class="verdict" style="border-left-color: var(--pass)">Always high, so the port does not exist at all.</div>
+      </div>
+    </div>
+
+    <p class="sub">A receiver that can stall is a receiver that loses market data. The wire has no brakes, so neither does this.</p>
   </div>
 </section>
 
