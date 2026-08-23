@@ -261,10 +261,20 @@
     font-size: clamp(8px, 1.35vmin, 13px); color: #08101C; font-weight: 600;
   }
   .c-eth { background: var(--eth); } .c-ip { background: var(--ip); } .c-udp { background: var(--udp); }
+  /* Boundary ruler: each number sits on the edge where that field starts,
+     and the run closes with 42 so the header's end is visible. */
   .offsets {
+    position: relative;
     display: grid; grid-template-columns: repeat(42, 1fr); gap: 2px; min-width: 620px;
-    margin-top: 1vmin; font-size: clamp(7px, 1.15vmin, 11px); color: var(--text-faint);
-    text-align: center; font-variant-numeric: tabular-nums;
+    margin-top: 1.1vmin; font-size: clamp(7px, 1.15vmin, 11px); color: var(--text-faint);
+    text-align: left; font-variant-numeric: tabular-nums;
+  }
+  .offsets > div { border-left: 1px solid var(--line); padding: 3px 0 0 2px; }
+  .offsets .end {
+    position: absolute; right: 0; top: 0;
+    border-right: 1px solid var(--amber);
+    padding: 3px 2px 0 0; text-align: right;
+    color: var(--amber); font-weight: 600;
   }
 
   /* ---------- field jobs ---------- */
@@ -633,6 +643,7 @@
         <div style="grid-column: span 4">26</div><div style="grid-column: span 4">30</div>
         <div style="grid-column: span 2">34</div><div style="grid-column: span 2">36</div>
         <div style="grid-column: span 2">38</div><div style="grid-column: span 2">40</div>
+        <div class="end">42</div>
       </div>
     </div>
 
