@@ -194,6 +194,21 @@
     font-size: clamp(7px, 1.15vmin, 11px); color: var(--text-faint);
     text-align: center; font-variant-numeric: tabular-nums;
   }
+  /* ---------- whole-frame scale ---------- */
+  .frame-scale { display: flex; gap: 3px; width: 100%; margin-top: 3vmin; }
+  .fs-seg {
+    height: 4.4vmin; min-height: 27px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(8px, 1.35vmin, 13px); font-weight: 600; color: #08101C;
+    white-space: nowrap; overflow: hidden;
+  }
+  .fs-hdr { background: var(--amber); flex: none; min-width: 7vmin; }
+  .fs-pay { background: var(--pay); color: var(--text-dim); }
+  .fs-note {
+    font-size: clamp(8px, 1.3vmin, 12px); color: var(--text-faint);
+    margin-top: 1.1vmin;
+  }
+
   /* ---------- field jobs ---------- */
   .jobs {
     width: 100%; margin-top: 3vmin; display: grid; gap: .9vmin;
@@ -517,6 +532,12 @@
         <div style="grid-column: span 2">40</div>
       </div>
     </div>
+    <div class="frame-scale">
+      <div class="fs-seg fs-hdr" style="flex: 42">42 B</div>
+      <div class="fs-seg fs-pay" style="flex: 1472">payload &mdash; the actual market data, up to 1472 bytes</div>
+    </div>
+    <div class="fs-note">The whole frame, to scale. Everything above is the amber sliver.</div>
+
     <div class="jobs">
       <div class="job j-eth"><b>dst MAC</b><span>next box on this cable</span></div>
       <div class="job j-eth"><b>src MAC</b><span>who handed it over</span></div>
@@ -533,7 +554,7 @@
       <div class="job j-udp reads"><b>dport</b><span>which feed &mdash; other half</span></div>
       <div class="job j-udp"><b>len / cksum</b><span>needs the payload &mdash; skipped</span></div>
     </div>
-    <p class="sub" style="margin-top: 2.6vmin">Amber = read by the core. The rest goes past untouched.</p>
+    <p class="sub" style="margin-top: 2.6vmin">Amber = read by the core. It never looks at the payload &mdash; its job is to say <em>where this goes</em>, not what it says.</p>
   </div>
 </section>
 
