@@ -264,6 +264,29 @@
   .accbytes { display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px; }
   .ab { height: 3.4vmin; min-height: 20px; border-radius: 2px; }
 
+  /* ---------- clock timeline ---------- */
+  .timeline {
+    display: flex; gap: 4vmin; width: 100%; margin-top: 4vmin;
+    align-items: flex-start; flex-wrap: wrap;
+  }
+  .tl-group { display: grid; gap: 1.3vmin; }
+  .tl-cells { display: flex; gap: 4px; }
+  .tick {
+    width: 5.2vmin; min-width: 30px; height: 5.2vmin; min-height: 30px;
+    border-radius: 5px; background: var(--ink-3); border: 1px solid var(--line);
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(9px, 1.55vmin, 14px); color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .tick.hot {
+    background: var(--amber-dim); border-color: var(--amber);
+    color: var(--amber); font-weight: 600;
+  }
+  .tl-cap {
+    font-size: clamp(8px, 1.35vmin, 13px); color: var(--text-faint); line-height: 1.45;
+  }
+  .tl-cap b { color: var(--text-dim); font-weight: 500; }
+
   /* ---------- pipeline ---------- */
   .pipe { display: grid; gap: 2.4vmin; width: 100%; margin-top: 5vmin; }
   @media (min-width: 860px) { .pipe { grid-template-columns: repeat(3, 1fr); } }
@@ -422,7 +445,7 @@
           <span class="val" style="color: var(--pass)">19 ns</span>
         </div>
         <div class="track"><div class="fill fast"></div></div>
-        <div class="note">3 clock cycles — the same 3, every time</div>
+        <div class="note">3 clock cycles after the last header byte — the same 3, every time</div>
       </div>
     </div>
     <p class="sub">The CPU is not just slower. It is <em>unpredictable</em>.</p>
@@ -595,25 +618,43 @@
 <!-- 10 ............................................................ -->
 <section class="slide">
   <div class="inner">
-    <h2>Three cycles</h2>
-    <div class="pipe">
-      <div class="pstage">
-        <div class="cyc">cycle 1</div>
-        <div class="nm">Collect</div>
-        <div class="ds">Beats shift into the accumulator until the header is complete.</div>
+    <h2>Three <span style="color: var(--amber)">clock</span> cycles to a verdict.</h2>
+
+    <div class="timeline">
+      <div class="tl-group">
+        <div class="tl-cells">
+          <span class="tick">0</span><span class="tick">1</span><span class="tick">2</span>
+          <span class="tick">3</span><span class="tick">4</span><span class="tick">5</span>
+        </div>
+        <div class="tl-cap"><b>header arriving</b> — 6 beats at 64-bit<br>not latency: the bytes are still on the wire</div>
       </div>
-      <div class="pstage">
-        <div class="cyc">cycle 2</div>
-        <div class="nm">Slice</div>
-        <div class="ds">Every field cut out at once. Checksum words summed.</div>
-      </div>
-      <div class="pstage">
-        <div class="cyc">cycle 3</div>
-        <div class="nm">Judge</div>
-        <div class="ds">Rules compared in parallel. Verdict out: pass, drop, and why.</div>
+      <div class="tl-group">
+        <div class="tl-cells">
+          <span class="tick hot">1</span><span class="tick hot">2</span><span class="tick hot">3</span>
+        </div>
+        <div class="tl-cap"><b>the decision</b> — always exactly 3<br>whatever the bus width</div>
       </div>
     </div>
-    <p class="sub">No <span style="color:var(--amber)">tready</span>. The core can never say "wait" — because the wire never does.</p>
+
+    <div class="pipe" style="margin-top: 4vmin">
+      <div class="pstage">
+        <div class="cyc">clock 1</div>
+        <div class="nm">Slice</div>
+        <div class="ds">Accumulator holds still. Every field cut out at once; the ten checksum words summed.</div>
+      </div>
+      <div class="pstage">
+        <div class="cyc">clock 2</div>
+        <div class="nm">Fold &amp; match</div>
+        <div class="ds">Carries folded back in. Every filter rule compared in parallel.</div>
+      </div>
+      <div class="pstage">
+        <div class="cyc">clock 3</div>
+        <div class="nm">Verdict</div>
+        <div class="ds">Pass, drop, channel and the reason — on the output pins.</div>
+      </div>
+    </div>
+
+    <p class="sub">At 156.25 MHz, one cycle is <span style="color: var(--amber)">6.4 ns</span>. And no <span style="color:var(--amber)">tready</span> — the core can never say "wait", because the wire never does.</p>
   </div>
 </section>
 
