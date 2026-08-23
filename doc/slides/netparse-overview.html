@@ -194,6 +194,29 @@
     font-size: clamp(7px, 1.15vmin, 11px); color: var(--text-faint);
     text-align: center; font-variant-numeric: tabular-nums;
   }
+  /* ---------- field jobs ---------- */
+  .jobs {
+    width: 100%; margin-top: 3vmin; display: grid; gap: .9vmin;
+    grid-template-columns: repeat(auto-fit, minmax(19vmin, 1fr));
+  }
+  .job {
+    border-left: 3px solid var(--line); border-radius: 0 6px 6px 0;
+    background: var(--ink-2); padding: .9vmin 1.3vmin;
+  }
+  .job b {
+    display: block; font-size: clamp(8px, 1.4vmin, 13px);
+    font-weight: 600; letter-spacing: .02em;
+  }
+  .job span {
+    display: block; font-size: clamp(7px, 1.2vmin, 12px);
+    color: var(--text-faint); line-height: 1.35; margin-top: .2vmin;
+  }
+  .job.j-eth { border-left-color: var(--eth); } .job.j-eth b { color: var(--eth); }
+  .job.j-ip  { border-left-color: var(--ip); }  .job.j-ip  b { color: var(--ip); }
+  .job.j-udp { border-left-color: var(--udp); } .job.j-udp b { color: var(--udp); }
+  .job.reads { background: var(--amber-dim); }
+  .job.reads span { color: var(--text-dim); }
+
   .legend {
     display: flex; flex-wrap: wrap; gap: 3vmin; margin-top: 3.4vmin;
     font-size: clamp(10px, 1.6vmin, 15px); color: var(--text-dim);
@@ -494,12 +517,23 @@
         <div style="grid-column: span 2">40</div>
       </div>
     </div>
-    <div class="legend">
-      <span><i class="sw" style="background: var(--eth)"></i> Ethernet</span>
-      <span><i class="sw" style="background: var(--ip)"></i> IPv4</span>
-      <span><i class="sw" style="background: var(--udp)"></i> UDP</span>
-      <span><i class="sw" style="border: 2.5px solid var(--amber)"></i> what the core reads</span>
+    <div class="jobs">
+      <div class="job j-eth"><b>dst MAC</b><span>next box on this cable</span></div>
+      <div class="job j-eth"><b>src MAC</b><span>who handed it over</span></div>
+      <div class="job j-eth reads"><b>type</b><span>is this IPv4 at all?</span></div>
+      <div class="job j-ip reads"><b>v</b><span>version 4, no options</span></div>
+      <div class="job j-ip"><b>len</b><span>how long in total</span></div>
+      <div class="job j-ip"><b>id</b><span>reassembly tag</span></div>
+      <div class="job j-ip reads"><b>frag</b><span>whole message, or a piece?</span></div>
+      <div class="job j-ip reads"><b>p</b><span>17 means UDP</span></div>
+      <div class="job j-ip reads"><b>cksum</b><span>header undamaged?</span></div>
+      <div class="job j-ip"><b>src IP</b><span>who sent it, globally</span></div>
+      <div class="job j-ip reads"><b>dst IP</b><span>which feed &mdash; half the answer</span></div>
+      <div class="job j-udp"><b>sport</b><span>sender's port</span></div>
+      <div class="job j-udp reads"><b>dport</b><span>which feed &mdash; other half</span></div>
+      <div class="job j-udp"><b>len / cksum</b><span>needs the payload &mdash; skipped</span></div>
     </div>
+    <p class="sub" style="margin-top: 2.6vmin">Amber = read by the core. The rest goes past untouched.</p>
   </div>
 </section>
 
