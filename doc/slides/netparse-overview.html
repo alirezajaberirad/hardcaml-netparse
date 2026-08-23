@@ -564,7 +564,7 @@
       <div class="job j-eth"><b>src MAC</b><span>who handed it over</span></div>
       <div class="job j-eth reads"><b>type</b><span>is this IPv4 at all?</span></div>
       <div class="job j-ip reads"><b>v</b><span>version 4, no options</span></div>
-      <div class="job j-ip"><b>len</b><span>how long in total</span></div>
+      <div class="job j-ip"><b>len</b><span>IP header + all that follows</span></div>
       <div class="job j-ip"><b>id</b><span>reassembly tag</span></div>
       <div class="job j-ip reads"><b>frag</b><span>whole message, or a piece?</span></div>
       <div class="job j-ip reads"><b>p</b><span>17 means UDP</span></div>
@@ -573,7 +573,8 @@
       <div class="job j-ip reads"><b>dst IP</b><span>which feed &mdash; half the answer</span></div>
       <div class="job j-udp"><b>sport</b><span>sender's port</span></div>
       <div class="job j-udp reads"><b>dport</b><span>which feed &mdash; other half</span></div>
-      <div class="job j-udp"><b>len / cksum</b><span>needs the payload &mdash; skipped</span></div>
+      <div class="job j-udp"><b>len</b><span>UDP header + payload only</span></div>
+      <div class="job j-udp"><b>cksum</b><span>covers the data &mdash; skipped</span></div>
     </div>
     <p class="sub" style="margin-top: 2.6vmin">Amber = read by the core. It never looks at the payload &mdash; its job is to say <em>where this goes</em>, not what it says.</p>
   </div>

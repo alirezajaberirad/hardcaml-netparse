@@ -277,6 +277,42 @@
     color: var(--amber); font-weight: 600;
   }
 
+  /* ---------- nested length spans ---------- */
+  .lenmap { width: 100%; margin-top: 4.5vmin; }
+  .lenrow { display: flex; }
+  .lenseg {
+    height: 5.6vmin; min-height: 33px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(8px, 1.45vmin, 14px); font-weight: 600; color: #08101C;
+    border-right: 2px solid var(--ink);
+  }
+  .lenseg:last-child { border-right: none; }
+  .brow { display: flex; margin-top: .9vmin; }
+  .br {
+    height: 4vmin; min-height: 24px; border: 2px solid; border-radius: 7px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(8px, 1.4vmin, 13px); font-weight: 600;
+  }
+  .br.ipb { border-color: var(--ip); color: var(--ip); background: rgba(63,181,175,.11); }
+  .br.udpb { border-color: var(--udp); color: var(--udp); background: rgba(192,131,168,.11); }
+
+  /* ---------- is / is not ---------- */
+  .isnot {
+    width: 100%; margin-top: 3.4vmin; display: grid; gap: 1.2vmin;
+    grid-template-columns: repeat(auto-fit, minmax(24vmin, 1fr));
+  }
+  .in {
+    border: 1px solid var(--line); border-radius: 9px;
+    background: var(--ink-2); padding: 1.6vmin 1.8vmin; text-align: left;
+  }
+  .in b { display: block; font-size: clamp(9px, 1.5vmin, 14px); font-weight: 600; }
+  .in span {
+    display: block; font-size: clamp(8px, 1.28vmin, 12px);
+    color: var(--text-faint); line-height: 1.4; margin-top: .3vmin;
+  }
+  .in.ok { border-color: var(--pass); } .in.ok b { color: var(--pass); }
+  .in.nope b { color: var(--drop); }
+
   /* ---------- colour key ---------- */
   .legend {
     display: flex; flex-wrap: wrap; gap: 2.6vmin; margin-top: 2.4vmin;
@@ -581,7 +617,12 @@
       <div class="sumline" style="color: var(--text-faint)">add all ten &nbsp;→&nbsp; 2&#8203;FFFD &nbsp;·&nbsp; carry the 2 back to the bottom</div>
       <div class="sumline" style="color: var(--pass)">= FFFF &nbsp;→&nbsp; intact</div>
     </div>
-    <p class="sub">The <span class="amber">amber word is chosen</span> to make the total come out all-ones. One flipped bit anywhere and it no longer does — so the packet gets thrown away instead of believed.</p>
+    <div class="isnot">
+      <div class="in ok"><b>detects damage</b><span>a flipped bit breaks the sum</span></div>
+      <div class="in nope"><b>does not repair</b><span>a bad packet is dropped, not fixed</span></div>
+      <div class="in nope"><b>is not security</b><span>anyone can recompute it</span></div>
+    </div>
+    <p class="sub">It covers the <em>header only</em> — because routers rewrite the hop budget at every hop and would have to redo the sum each time. Keeping it small keeps that cheap.</p>
   </div>
 </section>
 
@@ -670,7 +711,7 @@
       <div class="job j-eth"><b>type</b><span>what envelope is inside</span></div>
       <div class="job j-ip"><b>v</b><span>IPv4, and header length</span></div>
       <div class="job j-ip"><b>·</b><span>priority hint, mostly ignored</span></div>
-      <div class="job j-ip"><b>len</b><span>size of everything from here</span></div>
+      <div class="job j-ip"><b>len</b><span>20 + all that follows</span></div>
       <div class="job j-ip"><b>id</b><span>which message, if it was split</span></div>
       <div class="job j-ip"><b>frag</b><span>a piece of a bigger message?</span></div>
       <div class="job j-ip"><b>t</b><span>hop budget — lost packets die</span></div>
@@ -680,7 +721,7 @@
       <div class="job j-ip"><b>dst IP</b><span>the machine or group it is for</span></div>
       <div class="job j-udp"><b>sport</b><span>which program sent it</span></div>
       <div class="job j-udp"><b>dport</b><span>which program should get it</span></div>
-      <div class="job j-udp"><b>len</b><span>size of this datagram</span></div>
+      <div class="job j-udp"><b>len</b><span>8 + payload only</span></div>
       <div class="job j-udp"><b>cksum</b><span>damage check, data included</span></div>
     </div>
 
@@ -689,6 +730,30 @@
 </section>
 
 <!-- 16 -->
+<section class="slide">
+  <div class="inner">
+    <h2>Two lengths, two scopes.</h2>
+    <div class="lenmap">
+      <div class="lenrow">
+        <div class="lenseg" style="flex: 14; background: var(--eth)">Ethernet 14</div>
+        <div class="lenseg" style="flex: 20; background: var(--ip)">IPv4 20</div>
+        <div class="lenseg" style="flex: 8; background: var(--udp)">UDP 8</div>
+        <div class="lenseg" style="flex: 18; background: var(--pay); color: var(--text-dim)">payload 18</div>
+      </div>
+      <div class="brow">
+        <div style="flex: 14"></div>
+        <div class="br ipb" style="flex: 46">IPv4 len = 46</div>
+      </div>
+      <div class="brow">
+        <div style="flex: 34"></div>
+        <div class="br udpb" style="flex: 26">UDP len = 26</div>
+      </div>
+    </div>
+    <p class="sub">Each envelope counts <em>itself plus everything inside it</em> — and nothing outside. Neither one counts the Ethernet header, because neither layer knows it is there.</p>
+  </div>
+</section>
+
+<!-- 17 -->
 <section class="slide center">
   <div class="inner">
     <p class="eyebrow">next</p>
