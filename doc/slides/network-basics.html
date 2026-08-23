@@ -534,14 +534,15 @@
     <div class="sum">
       <div class="words">
         <span class="word">4500</span><span class="word">003C</span><span class="word">1234</span>
-        <span class="word">4000</span><span class="word">4011</span><span class="word">B1E6</span>
+        <span class="word">4000</span><span class="word">4011</span>
+        <span class="word" style="background: var(--amber)">7711</span>
         <span class="word">C0A8</span><span class="word">0101</span><span class="word">EFC0</span>
         <span class="word">0002</span>
       </div>
-      <div class="sumline" style="color: var(--text-faint)">add all ten together, fold the carries</div>
+      <div class="sumline" style="color: var(--text-faint)">add all ten &nbsp;→&nbsp; 2&#8203;FFFD &nbsp;·&nbsp; carry the 2 back to the bottom</div>
       <div class="sumline" style="color: var(--pass)">= FFFF &nbsp;→&nbsp; intact</div>
     </div>
-    <p class="sub">The <span class="amber">checksum</span> is arithmetic over the header. One flipped bit anywhere and the sum stops coming out right — so the packet gets thrown away instead of believed.</p>
+    <p class="sub">The <span class="amber">amber word is chosen</span> to make the total come out all-ones. One flipped bit anywhere and it no longer does — so the packet gets thrown away instead of believed.</p>
   </div>
 </section>
 
