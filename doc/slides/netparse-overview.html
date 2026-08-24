@@ -380,6 +380,32 @@
   .foot b { color: var(--text-dim); font-weight: 600; }
   .slide.center .foot { justify-content: center; }
 
+  /* ---------- receive chain ---------- */
+  .chain {
+    display: flex; align-items: stretch; gap: 1.3vmin; width: 100%;
+    margin-top: 4vmin; overflow-x: auto; padding-bottom: .5vmin;
+  }
+  .cnode {
+    border: 1px solid var(--line); border-radius: 10px; background: var(--ink-2);
+    padding: 1.8vmin 1.4vmin; text-align: center; flex: 1; min-width: 15vmin;
+    display: flex; flex-direction: column; gap: .7vmin; justify-content: flex-start;
+  }
+  .cn-tag {
+    font-size: clamp(6.5px, 1.05vmin, 10px); letter-spacing: .1em;
+    text-transform: uppercase; color: var(--text-faint);
+  }
+  .cn-t {
+    font-family: Archivo, sans-serif; font-weight: 700;
+    font-size: clamp(10px, 1.75vmin, 17px);
+  }
+  .cn-d {
+    font-size: clamp(7px, 1.22vmin, 12px); color: var(--text-dim); line-height: 1.42;
+  }
+  .cnode.hard { border-color: var(--udp); background: rgba(192,131,168,.10); }
+  .cnode.hard .cn-tag, .cnode.hard .cn-t { color: var(--udp); }
+  .cnode.mine { border-color: var(--amber); background: var(--amber-dim); }
+  .cnode.mine .cn-tag, .cnode.mine .cn-t { color: var(--amber); }
+
   /* ---------- bus width trade ---------- */
   .attempt {
     display: flex; align-items: center; gap: 1.8vmin; flex-wrap: wrap;
@@ -753,6 +779,49 @@
   </div>
 </section>
 
+<!-- 6a ............................................................ -->
+<section class="slide">
+  <div class="inner">
+    <h2>Bits on glass, bytes in fabric.</h2>
+
+    <div class="chain">
+      <div class="cnode">
+        <div class="cn-tag">glass</div>
+        <div class="cn-t">fibre</div>
+        <div class="cn-d">one serial bit stream<br>10.3125 Gbaud</div>
+      </div>
+      <div class="cnode hard">
+        <div class="cn-tag">hardened silicon</div>
+        <div class="cn-t">transceiver</div>
+        <div class="cn-d">recovers the clock, deserialises to a parallel word. <b>The only part running at line rate.</b></div>
+      </div>
+      <div class="cnode">
+        <div class="cn-tag">vendor IP, in fabric</div>
+        <div class="cn-t">PCS</div>
+        <div class="cn-d">64b/66b decode<br>and descramble</div>
+      </div>
+      <div class="cnode">
+        <div class="cn-tag">vendor IP, in fabric</div>
+        <div class="cn-t">MAC</div>
+        <div class="cn-d">finds frame edges, strips preamble, checks FCS</div>
+      </div>
+      <div class="cnode mine">
+        <div class="cn-tag">your logic</div>
+        <div class="cn-t">this core</div>
+        <div class="cn-d">64 bits per beat<br>at 156.25 MHz</div>
+      </div>
+    </div>
+
+    <p class="sub">The serial-to-parallel step is real — it is the <span style="color: var(--udp)">transceiver</span>, and it is purpose-built silicon rather than fabric. That is how a bit stream far too fast for programmable logic arrives as bytes at a clock the fabric can actually meet.</p>
+    <div class="foot">
+      <span><b>Gbaud</b> — billion symbols per second; 10.3125 carries 10 Gb/s of data plus encoding overhead</span>
+      <span><b>SerDes</b> — Serialiser / Deserialiser</span>
+      <span><b>PCS</b> — Physical Coding Sublayer</span>
+      <span><b>FCS</b> — Frame Check Sequence, the CRC on the end of every frame</span>
+    </div>
+  </div>
+</section>
+
 <!-- 6b ............................................................ -->
 <section class="slide">
   <div class="inner">
@@ -766,12 +835,12 @@
       <div class="arrow">→</div>
       <div style="flex: 1; display: grid; gap: 1.4vmin; min-width: 38vmin">
         <div class="attempt no">
-          <b>1 byte per cycle</b>
-          <span>would need a 1.25 GHz clock</span>
+          <b>1 byte per beat</b>
+          <span>would need 1.25 GHz in fabric</span>
           <i>✕ fabric does not go there</i>
         </div>
         <div class="attempt yes">
-          <b>8 bytes per cycle</b>
+          <b>8 bytes per beat</b>
           <span>needs only 156.25 MHz</span>
           <i>✓ comfortable</i>
         </div>
@@ -786,7 +855,7 @@
       <div class="wcell"><b>64 B</b><span>20 MHz</span></div>
     </div>
 
-    <p class="sub">So the MAC widens the bus: fewer, fatter transfers at a slower clock. That width is <span style="color: var(--amber)">W</span> — and choosing it is a trade, not a given.</p>
+    <p class="sub">So the transceiver deserialises wide, and the MAC hands fabric fewer, fatter transfers at a slower clock. That width is <span style="color: var(--amber)">W</span> — and choosing it is a trade, not a given.</p>
     <div class="foot">
       <span><b>Gb/s vs GB/s</b> — bits versus bytes: 10 gigabits per second is 1.25 gigabytes per second</span>
       <span><b>W</b> — the bus width, in bytes per transfer</span>
