@@ -700,7 +700,7 @@
         <div class="d">trades on it</div>
       </div>
     </div>
-    <p class="sub">The arrow only goes one way. Nothing you build can tell the exchange to send price updates more slowly &mdash; and any packet you were not ready for is <b style="color: var(--drop); font-weight: 400">gone for good</b>.</p>
+    <p class="sub">The arrow only goes one way. Nothing you build can tell the exchange to send price updates more slowly &mdash; and any packet you were not ready to receive is <b style="color: var(--drop); font-weight: 400">lost permanently</b>: UDP has no retransmission, so the exchange never sends it a second time.</p>
     <div class="foot">
       <span><b>FPGA</b> — Field-Programmable Gate Array: a chip whose logic you define</span>
       <span><b>UDP</b> — User Datagram Protocol</span>
@@ -948,7 +948,7 @@
         <div class="attempt no">
           <b>1 byte per beat</b>
           <span>would need 1.25 GHz in fabric</span>
-          <i>✕ fabric does not go there</i>
+          <i>✕ fabric cannot run that fast</i>
         </div>
         <div class="attempt yes">
           <b>8 bytes per beat</b>
@@ -1122,7 +1122,7 @@
       <span><i class="sw" style="background: var(--udp)"></i> UDP</span>
       <span><i class="sw" style="background: var(--pay)"></i> payload</span>
     </div>
-    <p class="sub">Shift every beat in at the top. Wait until all 42 bytes have landed &mdash; then every field sits at a fixed, known offset. Bytes <b style="color: var(--text-faint); font-weight: 400">42&ndash;47</b> are payload the last beat dragged in; the parser simply never slices them.</p>
+    <p class="sub">Shift every beat in at the top. Wait until all 42 bytes have landed &mdash; then every field sits at a fixed, known offset. Bytes <b style="color: var(--text-faint); font-weight: 400">42&ndash;47</b> are payload that arrived inside that same last beat; the parser simply never slices them.</p>
   </div>
 </section>
 
@@ -1266,7 +1266,7 @@
       </div>
     </div>
 
-    <p class="sub">A receiver that can stall is a receiver that loses market data. The wire has no brakes, so neither does this.</p>
+    <p class="sub">A receiver that can stall is a receiver that loses market data. The wire cannot be paused, so this core never pauses either.</p>
     <div class="foot">
       <span><b>AXI4-Stream</b> — the ARM AMBA streaming interface: how FPGA blocks pass data to each other</span>
       <span><b>t&hellip;</b> — the AXI naming convention for a stream signal</span>
