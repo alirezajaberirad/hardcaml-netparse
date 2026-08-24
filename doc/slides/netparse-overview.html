@@ -380,6 +380,44 @@
   .foot b { color: var(--text-dim); font-weight: 600; }
   .slide.center .foot { justify-content: center; }
 
+  /* ---------- bus width trade ---------- */
+  .attempt {
+    display: flex; align-items: center; gap: 1.8vmin; flex-wrap: wrap;
+    border: 1px solid var(--line); border-left: 4px solid var(--line);
+    border-radius: 0 10px 10px 0; background: var(--ink-2);
+    padding: 1.8vmin 2.2vmin;
+  }
+  .attempt b { font-size: clamp(10px, 1.85vmin, 18px); flex: none; }
+  .attempt span { font-size: clamp(9px, 1.5vmin, 14px); color: var(--text-dim); flex: 1; }
+  .attempt i { font-style: normal; font-size: clamp(9px, 1.5vmin, 14px); flex: none; }
+  .attempt.no { border-left-color: var(--drop); }
+  .attempt.no i { color: var(--drop); }
+  .attempt.yes { border-left-color: var(--pass); }
+  .attempt.yes i { color: var(--pass); }
+
+  .wgrid {
+    width: 100%; margin-top: 3.4vmin;
+    display: grid; grid-template-columns: repeat(auto-fit, minmax(13vmin, 1fr)); gap: 1.2vmin;
+  }
+  .wcell {
+    border: 1px solid var(--line); border-radius: 9px; background: var(--ink-2);
+    padding: 1.6vmin 1vmin; text-align: center;
+  }
+  .wcell b { display: block; font-size: clamp(10px, 1.85vmin, 18px); color: var(--text); }
+  .wcell span {
+    display: block; font-size: clamp(8px, 1.35vmin, 13px);
+    color: var(--text-dim); margin-top: .4vmin;
+  }
+  .wcell.spot { border-color: var(--amber); background: var(--amber-dim); }
+  .wcell.spot b { color: var(--amber); }
+
+  /* ---------- header chopped into beats ---------- */
+  .ruler48, .beatrow48 {
+    display: grid; grid-template-columns: repeat(48, 1fr); gap: 2px; min-width: 660px;
+  }
+  .ruler48 { margin-top: 4vmin; }
+  .beatrow48 { margin-top: 1vmin; }
+
   /* ---------- chopping diagram ---------- */
   .chop { width: 100%; margin-top: 4vmin; display: grid; gap: .9vmin; }
   .crow { display: flex; align-items: center; gap: 1.4vmin; }
@@ -715,6 +753,89 @@
   </div>
 </section>
 
+<!-- 6b ............................................................ -->
+<section class="slide">
+  <div class="inner">
+    <h2>The wire is faster than the chip.</h2>
+
+    <div class="row" style="margin-top: 3.4vmin">
+      <div class="node hot" style="min-width: 24vmin">
+        <div class="t">1.25 GB/s</div>
+        <div class="d">arriving, without pause</div>
+      </div>
+      <div class="arrow">→</div>
+      <div style="flex: 1; display: grid; gap: 1.4vmin; min-width: 38vmin">
+        <div class="attempt no">
+          <b>1 byte per cycle</b>
+          <span>would need a 1.25 GHz clock</span>
+          <i>✕ fabric does not go there</i>
+        </div>
+        <div class="attempt yes">
+          <b>8 bytes per cycle</b>
+          <span>needs only 156.25 MHz</span>
+          <i>✓ comfortable</i>
+        </div>
+      </div>
+    </div>
+
+    <div class="wgrid">
+      <div class="wcell"><b>4 B</b><span>313 MHz</span></div>
+      <div class="wcell spot"><b>8 B</b><span>156 MHz</span></div>
+      <div class="wcell"><b>16 B</b><span>78 MHz</span></div>
+      <div class="wcell"><b>32 B</b><span>39 MHz</span></div>
+      <div class="wcell"><b>64 B</b><span>20 MHz</span></div>
+    </div>
+
+    <p class="sub">So the MAC widens the bus: fewer, fatter transfers at a slower clock. That width is <span style="color: var(--amber)">W</span> — and choosing it is a trade, not a given.</p>
+    <div class="foot">
+      <span><b>Gb/s vs GB/s</b> — bits versus bytes: 10 gigabits per second is 1.25 gigabytes per second</span>
+      <span><b>W</b> — the bus width, in bytes per transfer</span>
+    </div>
+  </div>
+</section>
+
+<!-- 6c ............................................................ -->
+<section class="slide">
+  <div class="inner">
+    <h2>So the header arrives in chunks.</h2>
+    <div class="scroller">
+      <div class="ruler48">
+        <div class="cell c-eth" style="grid-column: span 6">dst MAC</div>
+        <div class="cell c-eth" style="grid-column: span 6">src MAC</div>
+        <div class="cell c-eth" style="grid-column: span 2">type</div>
+        <div class="cell c-ip" style="grid-column: span 1">v</div>
+        <div class="cell c-ip" style="grid-column: span 1">·</div>
+        <div class="cell c-ip" style="grid-column: span 2">len</div>
+        <div class="cell c-ip" style="grid-column: span 2">id</div>
+        <div class="cell c-ip" style="grid-column: span 2">frag</div>
+        <div class="cell c-ip" style="grid-column: span 1">t</div>
+        <div class="cell c-ip" style="grid-column: span 1">p</div>
+        <div class="cell c-ip" style="grid-column: span 2">cksum</div>
+        <div class="cell c-ip" style="grid-column: span 4">src IP</div>
+        <div class="cell c-ip" style="grid-column: span 4">dst IP</div>
+        <div class="cell c-udp" style="grid-column: span 2">sport</div>
+        <div class="cell c-udp" style="grid-column: span 2">dport</div>
+        <div class="cell c-udp" style="grid-column: span 2">len</div>
+        <div class="cell c-udp" style="grid-column: span 2">cksum</div>
+        <div class="cell c-pay" style="grid-column: span 6">payload…</div>
+      </div>
+      <div class="beatrow48">
+        <div class="cbeat" style="grid-column: span 8">beat 0</div>
+        <div class="cbeat" style="grid-column: span 8">beat 1</div>
+        <div class="cbeat" style="grid-column: span 8">beat 2</div>
+        <div class="cbeat" style="grid-column: span 8">beat 3</div>
+        <div class="cbeat" style="grid-column: span 8">beat 4</div>
+        <div class="cbeat" style="grid-column: span 8">beat 5</div>
+      </div>
+    </div>
+    <p class="sub">At W = 8, six transfers and the whole 42-byte header has arrived. Each transfer is a <span style="color: var(--amber)">beat</span> — and notice beat 5 already carries payload.</p>
+    <div class="foot">
+      <span><b>beat</b> — one transfer on the bus: the bytes that move in a single clock cycle</span>
+      <span><b>not the same as a cycle</b> — an idle cycle carries no beat, so the parser counts beats, never clocks</span>
+    </div>
+  </div>
+</section>
+
 <!-- 7 ............................................................. -->
 <section class="slide">
   <div class="inner">
@@ -770,10 +891,6 @@
     </div>
 
     <p class="sub">Same packet, same bytes. Only the beat boundaries move — and a field that survives whole at one width gets sliced at another.</p>
-    <div class="foot">
-      <span><b>beat</b> — one transfer on the bus: the bytes that move in a single clock cycle</span>
-      <span><b>not the same as a cycle</b> — an idle cycle carries no beat, so the parser counts beats, never clocks</span>
-    </div>
   </div>
 </section>
 
