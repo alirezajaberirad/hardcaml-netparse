@@ -170,6 +170,23 @@
   .fill.fast { width: 2.2%; background: var(--pass); min-width: 6px; }
   .bar-row .note { font-size: clamp(10px, 1.5vmin, 14px); color: var(--text-faint); margin-top: 1vmin; }
 
+  /* Each stop on the path, named and glossed -- the row is meant to read as
+     "look how many places this has to touch", which needs the names legible. */
+  .hops { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 1.5vmin; }
+  .hop {
+    display: flex; flex-direction: column; gap: .1vmin;
+    padding: .85vmin 1.3vmin; border-radius: 6px;
+    background: var(--ink-3); border: 1px solid var(--line);
+  }
+  .hop b {
+    font-weight: 600; color: var(--text-dim);
+    font-size: clamp(7.5px, 1.3vmin, 12px);
+  }
+  .hop i {
+    font-style: normal; font-size: clamp(6.5px, 1.08vmin, 10px);
+    color: var(--text-faint);
+  }
+
   /* ---------- byte map ---------- */
   .scroller { width: 100%; overflow-x: auto; }
   .ruler {
@@ -519,7 +536,14 @@
           <span class="val" style="color: var(--drop)">5,000&ndash;50,000 ns</span>
         </div>
         <div class="track"><div class="fill slow"></div></div>
-        <div class="note">NIC → DMA → interrupt → kernel → copy → userspace</div>
+        <div class="hops">
+          <span class="hop"><b>NIC</b><i>the network chip</i></span>
+          <span class="hop"><b>DMA</b><i>bytes into memory</i></span>
+          <span class="hop"><b>interrupt</b><i>poke the CPU</i></span>
+          <span class="hop"><b>kernel</b><i>the OS network code</i></span>
+          <span class="hop"><b>copy</b><i>into app memory</i></span>
+          <span class="hop"><b>app</b><i>your program, finally</i></span>
+        </div>
       </div>
       <div class="bar-row">
         <div class="cap">
@@ -527,6 +551,11 @@
           <span class="val" style="color: var(--pass)">19 ns</span>
         </div>
         <div class="track"><div class="fill fast"></div></div>
+        <div class="hops">
+          <span class="hop"><b>MAC</b><i>Ethernet front-end</i></span>
+          <span class="hop"><b>parse</b><i>this core</i></span>
+          <span class="hop"><b>verdict</b><i>pass or drop</i></span>
+        </div>
         <div class="note">3 clock cycles after the last header byte — the same 3, every time</div>
       </div>
     </div>
