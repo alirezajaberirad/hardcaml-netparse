@@ -581,6 +581,25 @@
     color: var(--text-faint); font-variant-numeric: tabular-nums;
   }
 
+  /* ---------- accumulator reference on the pipeline slide ---------- */
+  .accref { width: 100%; margin-top: 2.8vmin; }
+  .accref .arow, .accref .arange, .readbar {
+    display: grid; grid-template-columns: repeat(48, 1fr); gap: 2px;
+  }
+  .accref .ac { height: 2.4vmin; min-height: 14px; border-radius: 2px; }
+  .accref .arange {
+    margin-top: .7vmin; font-size: clamp(6.5px, 1.08vmin, 11px);
+    font-variant-numeric: tabular-nums;
+  }
+  .accref .ar { text-align: center; border-top: 1px solid currentColor; padding-top: .4vmin; }
+  .readbar { margin-top: 1vmin; }
+  .rb { height: 1.3vmin; min-height: 8px; border-radius: 2px; background: var(--ink-3); }
+  .rb.on { background: var(--amber); }
+  .readcap {
+    margin-top: .9vmin; font-size: clamp(7px, 1.18vmin, 12px); color: var(--text-faint);
+  }
+  .readcap b { color: var(--amber); font-weight: 600; }
+
   /* ---------- per-stage arithmetic ---------- */
   .pdetail { margin-top: 1.5vmin; display: grid; gap: .5vmin; }
   .pd { display: flex; gap: .9vmin; font-size: clamp(7px, 1.2vmin, 12px); line-height: 1.35; }
@@ -1160,6 +1179,24 @@
         </div>
         <div class="tl-cap"><b>the decision</b> — always exactly 3<br>whatever the bus width</div>
       </div>
+    </div>
+
+    <div class="accref">
+      <div class="arow"><i class="ac c-eth"></i><i class="ac c-eth"></i><i class="ac c-eth"></i><i class="ac c-eth"></i><i class="ac c-eth"></i><i class="ac c-eth"></i><i class="ac c-eth"></i><i class="ac c-eth"></i><i class="ac c-eth"></i><i class="ac c-eth"></i><i class="ac c-eth"></i><i class="ac c-eth"></i><i class="ac c-eth"></i><i class="ac c-eth"></i><i class="ac c-ip"></i><i class="ac c-ip"></i><i class="ac c-ip"></i><i class="ac c-ip"></i><i class="ac c-ip"></i><i class="ac c-ip"></i><i class="ac c-ip"></i><i class="ac c-ip"></i><i class="ac c-ip"></i><i class="ac c-ip"></i><i class="ac c-ip"></i><i class="ac c-ip"></i><i class="ac c-ip"></i><i class="ac c-ip"></i><i class="ac c-ip"></i><i class="ac c-ip"></i><i class="ac c-ip"></i><i class="ac c-ip"></i><i class="ac c-ip"></i><i class="ac c-ip"></i><i class="ac c-udp"></i><i class="ac c-udp"></i><i class="ac c-udp"></i><i class="ac c-udp"></i><i class="ac c-udp"></i><i class="ac c-udp"></i><i class="ac c-udp"></i><i class="ac c-udp"></i><i class="ac c-pay"></i><i class="ac c-pay"></i><i class="ac c-pay"></i><i class="ac c-pay"></i><i class="ac c-pay"></i><i class="ac c-pay"></i></div>
+      <div class="arange">
+        <div class="ar" style="grid-column: span 14; color: var(--eth)">0 &ndash; 13</div>
+        <div class="ar" style="grid-column: span 20; color: var(--ip)">14 &ndash; 33</div>
+        <div class="ar" style="grid-column: span 8; color: var(--udp)">34 &ndash; 41</div>
+        <div class="ar" style="grid-column: span 6; color: var(--text-faint)">42 &ndash; 47</div>
+      </div>
+      <div class="readbar">
+        <div class="rb" style="grid-column: span 12"></div>
+        <div class="rb on" style="grid-column: span 22"></div>
+        <div class="rb" style="grid-column: span 2"></div>
+        <div class="rb on" style="grid-column: span 2"></div>
+        <div class="rb" style="grid-column: span 10"></div>
+      </div>
+      <div class="readcap">clock 1 reads only the amber bytes &mdash; <b>12&ndash;33</b> and <b>36&ndash;37</b>. Both MAC addresses, the source port and the UDP length and checksum are never touched.</div>
     </div>
 
     <div class="pipe" style="margin-top: 3.4vmin">
