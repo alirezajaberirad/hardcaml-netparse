@@ -882,7 +882,7 @@
       <div class="cnode mine">
         <div class="cn-tag">your logic</div>
         <div class="cn-t">this core</div>
-        <div class="cn-d">64 bits per beat<br>at 156.25 MHz</div>
+        <div class="cn-d">8 bytes per beat<br>at 156.25 MHz</div>
       </div>
     </div>
 
@@ -1109,7 +1109,7 @@
           <span class="tick">0</span><span class="tick">1</span><span class="tick">2</span>
           <span class="tick">3</span><span class="tick">4</span><span class="tick">5</span>
         </div>
-        <div class="tl-cap"><b>header arriving</b> — 6 beats at 64-bit<br>not latency: the bytes are still on the wire</div>
+        <div class="tl-cap"><b>header arriving</b> — 6 beats at W = 8<br>not latency: the bytes are still on the wire</div>
       </div>
       <div class="tl-group">
         <div class="tl-cells">
@@ -1212,11 +1212,11 @@
       </div>
       <div class="arrow">→</div>
       <div class="fanouts">
-        <div class="fo"><div class="w">32-bit</div><div class="b">11 beats</div></div>
-        <div class="fo"><div class="w">64-bit</div><div class="b">6 beats</div></div>
-        <div class="fo"><div class="w">128-bit</div><div class="b">3 beats</div></div>
-        <div class="fo"><div class="w">256-bit</div><div class="b">2 beats</div></div>
-        <div class="fo"><div class="w">512-bit</div><div class="b">1 beat</div></div>
+        <div class="fo"><div class="w">W = 4</div><div class="b">11 beats</div></div>
+        <div class="fo"><div class="w">W = 8</div><div class="b">6 beats</div></div>
+        <div class="fo"><div class="w">W = 16</div><div class="b">3 beats</div></div>
+        <div class="fo"><div class="w">W = 32</div><div class="b">2 beats</div></div>
+        <div class="fo"><div class="w">W = 64</div><div class="b">1 beat</div></div>
       </div>
     </div>
     <p class="sub">The OCaml runs on your laptop, not the FPGA. What it leaves behind is Verilog.</p>
@@ -1233,11 +1233,11 @@
           <tr><th>Datapath</th><th>LUT</th><th>FF</th><th>Fmax</th><th>10 GbE</th><th>25 GbE</th></tr>
         </thead>
         <tbody>
-          <tr><td>32-bit</td><td>244</td><td>368</td><td>206 MHz</td><td class="no">no</td><td class="no">no</td></tr>
-          <tr class="spot"><td>64-bit</td><td>226</td><td>428</td><td>207 MHz</td><td class="yes">yes</td><td class="no">no</td></tr>
-          <tr><td>128-bit</td><td>240</td><td>427</td><td>213 MHz</td><td class="yes">yes</td><td class="yes">yes</td></tr>
-          <tr><td>256-bit</td><td>266</td><td>490</td><td>207 MHz</td><td class="yes">yes</td><td class="yes">yes</td></tr>
-          <tr><td>512-bit</td><td>330</td><td>329</td><td>203 MHz</td><td class="yes">yes</td><td class="yes">yes</td></tr>
+          <tr><td>4 B</td><td>244</td><td>368</td><td>206 MHz</td><td class="no">no</td><td class="no">no</td></tr>
+          <tr class="spot"><td>8 B</td><td>226</td><td>428</td><td>207 MHz</td><td class="yes">yes</td><td class="no">no</td></tr>
+          <tr><td>16 B</td><td>240</td><td>427</td><td>213 MHz</td><td class="yes">yes</td><td class="yes">yes</td></tr>
+          <tr><td>32 B</td><td>266</td><td>490</td><td>207 MHz</td><td class="yes">yes</td><td class="yes">yes</td></tr>
+          <tr><td>64 B</td><td>330</td><td>329</td><td>203 MHz</td><td class="yes">yes</td><td class="yes">yes</td></tr>
         </tbody>
       </table>
     </div>
@@ -1247,6 +1247,7 @@
       <span><b>FF</b> — Flip-Flop: one bit of register</span>
       <span><b>Fmax</b> — the fastest clock the design closes timing at</span>
       <span><b>GbE</b> — Gigabit Ethernet</span>
+      <span><b>datapath</b> — quoted here as W, bytes per beat; the same widths are called 32/64/128/256/512-bit elsewhere</span>
     </div>
   </div>
 </section>
