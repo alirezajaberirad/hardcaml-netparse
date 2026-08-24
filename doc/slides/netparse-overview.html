@@ -451,6 +451,19 @@
   .ruler48 { margin-top: 4vmin; }
   .beatrow48 { margin-top: 1vmin; }
 
+  /* Spans the header against the payload, so the 48-column grid is not
+     mistaken for a 48-byte packet. */
+  .hdrspan {
+    display: grid; grid-template-columns: repeat(48, 1fr); gap: 2px;
+    min-width: 660px; margin-top: 1vmin;
+  }
+  .hs {
+    border-radius: 4px; padding: .7vmin 0; text-align: center;
+    font-size: clamp(7px, 1.2vmin, 11px); font-weight: 600;
+  }
+  .hs.hdr { background: var(--amber-dim); border: 1px solid var(--amber); color: var(--amber); }
+  .hs.pay { background: var(--ink-3); border: 1px solid var(--line); color: var(--text-faint); }
+
   /* ---------- chopping diagram ---------- */
   .chop { width: 100%; margin-top: 4vmin; display: grid; gap: .9vmin; }
   .crow { display: flex; align-items: center; gap: 1.4vmin; }
@@ -895,6 +908,10 @@
         <div class="cell c-udp" style="grid-column: span 2">cksum</div>
         <div class="cell c-pay" style="grid-column: span 6">payload…</div>
       </div>
+      <div class="hdrspan">
+        <div class="hs hdr" style="grid-column: span 42">42 bytes of header — fixed, always</div>
+        <div class="hs pay" style="grid-column: span 6">payload…</div>
+      </div>
       <div class="beatrow48">
         <div class="cbeat" style="grid-column: span 8">beat 0</div>
         <div class="cbeat" style="grid-column: span 8">beat 1</div>
@@ -910,7 +927,7 @@
       <span><i class="sw" style="background: var(--udp)"></i> UDP</span>
       <span><i class="sw" style="background: var(--pay)"></i> payload</span>
     </div>
-    <p class="sub">At W = 8, six transfers and the whole 42-byte header has arrived. Each transfer is a <span style="color: var(--amber)">beat</span> — and notice beat 5 already carries payload.</p>
+    <p class="sub">Six beats of 8 bytes is <span style="color: var(--amber)">48</span> — but the header is only 42. Beat 5 brings the last 2 header bytes and 6 bytes of payload, so the collector has to be 48 wide to hold a whole header.</p>
     <div class="foot">
       <span><b>beat</b> — one transfer on the bus: the bytes that move in a single clock cycle</span>
       <span><b>not the same as a cycle</b> — an idle cycle carries no beat, so the parser counts beats, never clocks</span>
