@@ -41,7 +41,12 @@ let default =
   ; dst_ip = 0xc0a80102 (* 192.168.1.2 *)
   ; src_port = 12345
   ; dst_port = 4321
-  ; payload_len = 18 (* -> 60-byte frame, the Ethernet minimum *)
+  (* 42 header + 18 = 60 bytes, which is the minimum legal Ethernet frame of 64
+     once the MAC appends the 4-byte FCS. 18 is therefore the smallest UDP
+     payload that needs no padding, and a 60-byte frame is the worst case for
+     this core: the shortest packets arrive most often, so they leave the least
+     time before the next one. *)
+  ; payload_len = 18
   ; ethertype = Packet_defs.ethertype_ipv4
   ; ver_ihl = (Packet_defs.ip_version_4 lsl 4) lor Packet_defs.ip_ihl_no_options
   ; proto = Packet_defs.ip_proto_udp
