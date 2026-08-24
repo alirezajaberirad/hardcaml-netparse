@@ -160,6 +160,23 @@
   }
   .budget-key span { text-align: center; }
 
+  /* Decomposes the frame segment above it, so the 64 is not a bare number. */
+  .seg-split { display: flex; gap: 3px; }
+  .ss {
+    height: 4.2vmin; min-height: 26px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(6.5px, 1.2vmin, 12px); font-weight: 600;
+    overflow: hidden; white-space: nowrap;
+  }
+  .ss.hdr { background: var(--amber-dim); border: 1px solid var(--amber); color: var(--amber); }
+  .ss.dat { background: var(--ink-3); border: 1px solid var(--line); color: var(--text-dim); }
+  .ss.fcs { background: var(--hw); color: #08101C; }
+  .eqline {
+    width: 100%; max-width: 780px; margin: 1.7vmin auto 0;
+    font-size: clamp(8px, 1.42vmin, 13px); color: var(--text-dim); text-align: center;
+  }
+  .eqline b { color: var(--amber); font-weight: 600; }
+
   /* ---------- bar comparison ---------- */
   .bars { width: 100%; margin-top: 6vmin; display: grid; gap: 4vmin; }
   .bar-row .cap {
@@ -644,6 +661,19 @@
       <span style="flex: 8">preamble<br>+ SFD</span>
       <span style="flex: 64">smallest legal frame</span>
       <span style="flex: 12">interframe<br>gap</span>
+    </div>
+
+    <div class="budget" style="margin-top: 1.6vmin">
+      <div style="flex: 8"></div>
+      <div class="seg-split" style="flex: 64">
+        <div class="ss hdr" style="flex: 42">42 header</div>
+        <div class="ss dat" style="flex: 18">18 data</div>
+        <div class="ss fcs" style="flex: 4">4</div>
+      </div>
+      <div style="flex: 12"></div>
+    </div>
+    <div class="eqline">
+      <b>64 B</b> smallest legal frame = 42 B header + 18 B minimum data + 4 B FCS/CRC
     </div>
     <p class="sub">84 bytes = 672 bits &nbsp;÷&nbsp; 10 Gb/s &nbsp;=&nbsp; 67.2 ns<br>
       <span style="color: var(--text-faint)">14,880,952 packets per second</span></p>

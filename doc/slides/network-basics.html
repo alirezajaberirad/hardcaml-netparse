@@ -23,6 +23,10 @@
     --udp: #C083A8;
     --pay: #47536A;
 
+    /* Non-protocol emphasis, deliberately outside the eth/ip/udp palette so it
+       cannot be misread as a layer. */
+    --hw:  #98A2B8;
+
     --pass: #4FBE8B;
     --drop: #E4735C;
   }
@@ -246,11 +250,28 @@
     display: flex; align-items: center; justify-content: center;
     font-size: clamp(9px, 1.6vmin, 15px); font-weight: 600; color: #08101C;
   }
-  .s-pre { background: var(--udp); }
+  .s-pre { background: var(--hw); }
   .s-frm { background: var(--amber); }
   .s-gap { background: var(--pay); color: var(--text-dim); }
   .budget-key { margin-top: 1.3vmin; font-size: clamp(8px, 1.25vmin, 12px); color: var(--text-faint); line-height: 1.35; }
   .budget-key span { text-align: center; }
+
+  /* Decomposes the frame segment above it, so the 64 is not a bare number. */
+  .seg-split { display: flex; gap: 3px; }
+  .ss {
+    height: 4.2vmin; min-height: 26px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(6.5px, 1.2vmin, 12px); font-weight: 600;
+    overflow: hidden; white-space: nowrap;
+  }
+  .ss.hdr { background: var(--amber-dim); border: 1px solid var(--amber); color: var(--amber); }
+  .ss.dat { background: var(--ink-3); border: 1px solid var(--line); color: var(--text-dim); }
+  .ss.fcs { background: var(--hw); color: #08101C; }
+  .eqline {
+    width: 100%; max-width: 800px; margin: 1.7vmin auto 0;
+    font-size: clamp(8px, 1.42vmin, 13px); color: var(--text-dim); text-align: center;
+  }
+  .eqline b { color: var(--amber); font-weight: 600; }
 
   /* ---------- byte map ---------- */
   .scroller { width: 100%; overflow-x: auto; }
@@ -675,6 +696,19 @@
       <span style="flex: 64">the frame — headers + data</span>
       <span style="flex: 12">interframe<br>gap</span>
     </div>
+
+    <div class="budget" style="margin-top: 1.6vmin">
+      <div style="flex: 8"></div>
+      <div class="seg-split" style="flex: 64">
+        <div class="ss hdr" style="flex: 42">42 header</div>
+        <div class="ss dat" style="flex: 18">18 data</div>
+        <div class="ss fcs" style="flex: 4">4</div>
+      </div>
+      <div style="flex: 12"></div>
+    </div>
+    <div class="eqline">
+      <b>64 B</b> smallest legal frame = 42 B header + 18 B minimum data + 4 B FCS/CRC
+    </div>
     <div class="qgrid" style="margin-top: 4vmin">
       <div class="q l-udp">
         <span class="layer">preamble</span>
@@ -695,6 +729,8 @@
     <div class="foot">
       <span><b>SFD</b> — Start Frame Delimiter</span>
       <span><b>bit-time</b> — how long one bit takes on the wire</span>
+      <span><b>FCS</b> — Frame Check Sequence: a CRC over the whole frame, checked and stripped by the MAC</span>
+      <span><b>CRC</b> — Cyclic Redundancy Check</span>
     </div>
   </div>
 </section>
