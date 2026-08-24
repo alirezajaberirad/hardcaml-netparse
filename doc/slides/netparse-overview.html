@@ -565,6 +565,35 @@
     color: var(--text-dim); margin-top: .3vmin; line-height: 1.4;
   }
 
+
+  /* ---------- same-offset proof ---------- */
+  .proof { width: 100%; margin-top: 3.6vmin; display: grid; gap: 1vmin; }
+  .prow { display: flex; align-items: center; gap: 1.4vmin; }
+  .plab {
+    width: 9vmin; min-width: 52px; flex: none; text-align: right;
+    font-size: clamp(7.5px, 1.3vmin, 12px); color: var(--text-dim);
+  }
+  .pcells { flex: 1; display: grid; grid-template-columns: repeat(64, 1fr); gap: 1px; }
+  .pc { height: 2.7vmin; min-height: 16px; border-radius: 2px; opacity: .5; }
+  .pc.hi { background: var(--amber); opacity: 1; }
+  .psize {
+    flex: none; min-width: 6vmin; font-size: clamp(7px, 1.2vmin, 11px);
+    color: var(--text-faint); font-variant-numeric: tabular-nums;
+  }
+
+  /* ---------- per-stage arithmetic ---------- */
+  .pdetail { margin-top: 1.5vmin; display: grid; gap: .5vmin; }
+  .pd { display: flex; gap: .9vmin; font-size: clamp(7px, 1.2vmin, 12px); line-height: 1.35; }
+  .pd .by {
+    color: var(--amber); flex: none; min-width: 7.6vmin;
+    font-variant-numeric: tabular-nums;
+  }
+  .pd .op { color: var(--text-dim); }
+  .preg {
+    margin-top: 1.3vmin; padding-top: 1vmin; border-top: 1px solid var(--line);
+    font-size: clamp(6.8px, 1.12vmin, 11px); color: var(--text-faint); line-height: 1.4;
+  }
+
   /* ---------- fan out ---------- */
   .fan { display: flex; align-items: center; gap: 3vmin; margin-top: 5vmin; width: 100%; flex-wrap: wrap; }
   .srcnode {
@@ -1090,11 +1119,25 @@
 </section>
 
 <!-- 9 ............................................................. -->
-<section class="slide center">
+<section class="slide">
   <div class="inner">
-    <p class="eyebrow">once it is full</p>
-    <h1>Byte <span style="color: var(--amber)">k</span> is always<br>in the same place.</h1>
-    <p class="sub">Any bus width. One set of constant offsets.<br>The straddling problem does not get solved — it stops existing.</p>
+    <p class="eyebrow">once the header has landed</p>
+    <h2>Byte <span style="color: var(--amber)">k</span> sits at the same offset. Every width.</h2>
+    <div class="proof">
+        <div class="prow"><span class="plab">W = 4 B</span><div class="pcells"><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc hi"></i><i class="pc hi"></i><i class="pc hi"></i><i class="pc hi"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-pay"></i><i class="pc c-pay"></i></div><span class="psize">44 B</span></div>
+        <div class="prow"><span class="plab">W = 8 B</span><div class="pcells"><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc hi"></i><i class="pc hi"></i><i class="pc hi"></i><i class="pc hi"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i></div><span class="psize">48 B</span></div>
+        <div class="prow"><span class="plab">W = 16 B</span><div class="pcells"><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc hi"></i><i class="pc hi"></i><i class="pc hi"></i><i class="pc hi"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i></div><span class="psize">48 B</span></div>
+        <div class="prow"><span class="plab">W = 32 B</span><div class="pcells"><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc hi"></i><i class="pc hi"></i><i class="pc hi"></i><i class="pc hi"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i></div><span class="psize">64 B</span></div>
+        <div class="prow"><span class="plab">W = 64 B</span><div class="pcells"><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-eth"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc c-ip"></i><i class="pc hi"></i><i class="pc hi"></i><i class="pc hi"></i><i class="pc hi"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-udp"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i><i class="pc c-pay"></i></div><span class="psize">64 B</span></div>
+    </div>
+    <div class="legend mini">
+      <span><i class="sw" style="background: var(--amber)"></i> destination IP &mdash; bytes 30&ndash;33</span>
+      <span><i class="sw" style="background: var(--eth)"></i> Ethernet</span>
+      <span><i class="sw" style="background: var(--ip)"></i> IPv4</span>
+      <span><i class="sw" style="background: var(--udp)"></i> UDP</span>
+      <span><i class="sw" style="background: var(--pay)"></i> payload</span>
+    </div>
+    <p class="sub">The accumulators are different sizes &mdash; 44, 48, 64 bytes &mdash; because each rounds up to a whole beat. But all of them fill from the top, so the amber stripe lands in the same column every time. <b style="color: var(--amber); font-weight: 400">One slice expression, no per-width cases.</b></p>
   </div>
 </section>
 
@@ -1119,24 +1162,46 @@
       </div>
     </div>
 
-    <div class="pipe" style="margin-top: 4vmin">
+    <div class="pipe" style="margin-top: 3.4vmin">
       <div class="pstage">
         <div class="cyc">clock 1</div>
-        <div class="nm">Slice</div>
-        <div class="ds">Accumulator holds still. Every field cut out at once; the ten checksum words summed.</div>
+        <div class="nm">Slice &amp; sum</div>
+        <div class="pdetail">
+          <div class="pd"><span class="by">[12:13]</span><span class="op">ethertype = 0800?</span></div>
+          <div class="pd"><span class="by">[14]</span><span class="op">ver/IHL = 45?</span></div>
+          <div class="pd"><span class="by">[20:21]</span><span class="op">&amp; 3FFF &ne; 0 &rarr; fragment</span></div>
+          <div class="pd"><span class="by">[23]</span><span class="op">protocol = 17?</span></div>
+          <div class="pd"><span class="by">[30:33]</span><span class="op">dst IP, held as-is</span></div>
+          <div class="pd"><span class="by">[36:37]</span><span class="op">dst port, held as-is</span></div>
+          <div class="pd"><span class="by">[14:33]</span><span class="op">&Sigma; ten 16-bit words &rarr; 20 bits</span></div>
+        </div>
+        <div class="preg">registers 6 flags, dst IP, dst port, the 20-bit sum</div>
       </div>
       <div class="pstage">
         <div class="cyc">clock 2</div>
         <div class="nm">Fold &amp; match</div>
-        <div class="ds">Carries folded back in. Every filter rule compared in parallel.</div>
+        <div class="pdetail">
+          <div class="pd"><span class="by">sum</span><span class="op">[19:16] + [15:0] &rarr; 17 bits</span></div>
+          <div class="pd"><span class="by">again</span><span class="op">[16] + [15:0] &rarr; 16 bits</span></div>
+          <div class="pd"><span class="by">= FFFF?</span><span class="op">header intact</span></div>
+          <div class="pd"><span class="by">4 rules</span><span class="op">(dst IP, dst port) compared at once</span></div>
+          <div class="pd"><span class="by">OR</span><span class="op">6 flags + checksum &rarr; malformed</span></div>
+          <div class="pd"><span class="by">AND</span><span class="op">hit &amp; not malformed &rarr; pass</span></div>
+        </div>
+        <div class="preg">registers pass, channel, seven reason bits</div>
       </div>
       <div class="pstage">
         <div class="cyc">clock 3</div>
-        <div class="nm">Verdict</div>
-        <div class="ds">Pass, drop, channel and the reason — on the output pins.</div>
+        <div class="nm">Out</div>
+        <div class="pdetail">
+          <div class="pd"><span class="by">valid</span><span class="op">one-cycle pulse</span></div>
+          <div class="pd"><span class="by">pass</span><span class="op">keep it, or drop it</span></div>
+          <div class="pd"><span class="by">channel</span><span class="op">which feed matched</span></div>
+          <div class="pd"><span class="by">err_*</span><span class="op">why, if dropped</span></div>
+        </div>
+        <div class="preg">no arithmetic &mdash; the output register presenting clock 2's result</div>
       </div>
     </div>
-
     <p class="sub">At 156.25 MHz, one cycle is <span style="color: var(--amber)">6.4 ns</span>.</p>
   </div>
 </section>
