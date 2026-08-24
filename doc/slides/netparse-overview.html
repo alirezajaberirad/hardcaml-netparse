@@ -613,6 +613,41 @@
     font-size: clamp(6.8px, 1.12vmin, 11px); color: var(--text-faint); line-height: 1.4;
   }
 
+  /* ---------- null-result story ---------- */
+  .story { width: 100%; display: grid; gap: 2vmin; margin-top: 3.2vmin; }
+  @media (min-width: 900px) { .story { grid-template-columns: repeat(3, 1fr); } }
+  .st {
+    border: 1px solid var(--line); border-radius: 12px; background: var(--ink-2);
+    padding: 2.2vmin 2vmin; display: flex; flex-direction: column; gap: 1.4vmin;
+  }
+  .stepn {
+    font-size: clamp(8px, 1.32vmin, 13px); color: var(--amber);
+    letter-spacing: .14em; text-transform: uppercase;
+  }
+  .stepd { font-size: clamp(7.5px, 1.3vmin, 13px); color: var(--text-dim); line-height: 1.45; }
+  .stepd b { color: var(--text); font-weight: 600; }
+  .fbars { display: flex; align-items: flex-end; gap: .7vmin; height: 11vmin; min-height: 64px; }
+  .fb {
+    flex: 1; height: 100%; display: flex; flex-direction: column;
+    justify-content: flex-end; align-items: center; gap: .35vmin;
+  }
+  .fb i { display: block; width: 100%; background: var(--ip); border-radius: 3px 3px 0 0; }
+  .fb span { font-size: clamp(6.5px, 1.05vmin, 10px); color: var(--text-dim); font-variant-numeric: tabular-nums; }
+  .fb em { font-style: normal; font-size: clamp(6px, .98vmin, 9px); color: var(--text-faint); }
+  .deltas { display: grid; gap: .45vmin; }
+  .dl {
+    display: flex; justify-content: space-between;
+    font-size: clamp(7.5px, 1.25vmin, 12px); color: var(--text-dim);
+    font-variant-numeric: tabular-nums;
+  }
+  .dl .neg { color: var(--drop); }
+  .dl .pos { color: var(--pass); }
+  .dl.mean { border-top: 1px solid var(--line); padding-top: .6vmin; margin-top: .25vmin; color: var(--text); }
+  .measured { display: grid; gap: .55vmin; font-size: clamp(7.5px, 1.25vmin, 12px); }
+  .measured .mrow { display: flex; gap: .8vmin; }
+  .measured .mk { color: var(--amber); min-width: 8vmin; flex: none; }
+  .measured .mv { color: var(--text-dim); }
+
   /* ---------- fan out ---------- */
   .fan { display: flex; align-items: center; gap: 3vmin; margin-top: 5vmin; width: 100%; flex-wrap: wrap; }
   .srcnode {
@@ -1362,15 +1397,40 @@
 </section>
 
 <!-- 13 ............................................................ -->
-<section class="slide center">
+<section class="slide">
   <div class="inner">
     <p class="eyebrow">and one honest result</p>
     <h2>The first fix did nothing.</h2>
-    <p class="sub">
-      Flat Fmax across a 16× width range said the bottleneck was width-independent.
-      That much was right. The guess — the checksum adder chain — was wrong.
-      Measuring the routed path found it one stage downstream, in the carry fold.
-    </p>
+
+    <div class="story">
+      <div class="st">
+        <div class="stepn">1 &middot; observed</div>
+        <div class="fbars"><div class="fb"><i style="height: 82.4%"></i><span>206</span><em>4 B</em></div><div class="fb"><i style="height: 83.2%"></i><span>208</span><em>8 B</em></div><div class="fb"><i style="height: 80.0%"></i><span>200</span><em>16 B</em></div><div class="fb"><i style="height: 84.8%"></i><span>212</span><em>32 B</em></div><div class="fb"><i style="height: 85.6%"></i><span>214</span><em>64 B</em></div></div>
+        <div class="stepd">Fmax is the fastest clock a design closes timing at. It barely moves across a <b>16&times; range</b> of bus widths &mdash; so whatever limits it is <b>not in the datapath</b>, because the datapath is what changed.</div>
+      </div>
+
+      <div class="st">
+        <div class="stepn">2 &middot; guessed, and rebuilt</div>
+        <div class="stepd" style="margin-bottom:.4vmin">Suspect: the checksum. It summed ten words as a <b>chain 10 adders deep</b> instead of a <b>tree 4 deep</b>. Rebuilt as a tree, re-ran synthesis:</div>
+        <div class="deltas"><div class="dl"><span>4 B</span><b class="neg">-0.2%</b></div><div class="dl"><span>8 B</span><b class="neg">-0.4%</b></div><div class="dl"><span>16 B</span><b class="pos">+6.3%</b></div><div class="dl"><span>32 B</span><b class="neg">-2.4%</b></div><div class="dl"><span>64 B</span><b class="neg">-5.1%</b></div>
+          <div class="dl mean"><span>mean</span><b class="neg">&minus;0.4%</b></div>
+        </div>
+        <div class="stepd">Mixed signs, mean unchanged. That is <b>run-to-run placement noise</b>, not an improvement.</div>
+      </div>
+
+      <div class="st">
+        <div class="stepn">3 &middot; measured instead</div>
+        <div class="measured">
+          <div class="mrow"><span class="mk">tool</span><span class="mv">critpath.tcl reports the routed worst path</span></div>
+          <div class="mrow"><span class="mk">depth</span><span class="mv">13 levels of logic, 4.797 ns</span></div>
+          <div class="mrow"><span class="mk">from</span><span class="mv">the 20-bit checksum sum register</span></div>
+          <div class="mrow"><span class="mk">to</span><span class="mv">err_bad_checksum</span></div>
+        </div>
+        <div class="stepd">So the limit is the <b>carry fold and 0xFFFF compare</b> &mdash; clock 2, one stage <em>after</em> the adder that was rebuilt. Vivado had already balanced that adder itself, so changing its shape was never going to matter.</div>
+      </div>
+    </div>
+
+    <p class="sub">A difference smaller than the spread between runs is not a result. Build only the 16 B variant and that <b style="color: var(--pass); font-weight:400">+6.3%</b> looks like a win.</p>
   </div>
 </section>
 
