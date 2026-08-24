@@ -941,7 +941,7 @@
 <section class="slide">
   <div class="inner">
     <h2>So the header arrives in chunks.</h2>
-    <p class="assume">running example: <b>W = 8</b> &middot; one block = one byte</p>
+    <p class="assume">running example: <b>W = 8 B</b> &middot; one block = one byte</p>
     <div class="scroller">
       <div class="ruler48">
         <div class="cell c-eth" style="grid-column: span 6">dst MAC</div>
@@ -1015,14 +1015,14 @@
         </div>
       </div>
       <div class="crow">
-        <span class="clab">W = 8</span>
+        <span class="clab">W = 8 B</span>
         <div class="cgrid">
           <div class="cbeat" style="grid-column: span 8">beat 3</div>
           <div class="cbeat" style="grid-column: span 4">beat 4</div>
         </div>
       </div>
       <div class="crow">
-        <span class="clab">W = 4</span>
+        <span class="clab">W = 4 B</span>
         <div class="cgrid">
           <div class="cbeat" style="grid-column: span 4">beat 6</div>
           <div class="cbeat" style="grid-column: span 4">beat 7</div>
@@ -1033,12 +1033,12 @@
 
     <div class="two" style="margin-top: 3.4vmin">
       <div class="panel">
-        <div class="ttl">at W = 8</div>
+        <div class="ttl">at W = 8 B</div>
         <div class="split-line whole">src IP — arrives whole, inside beat 3</div>
         <div class="split-line cut">dst IP — cut in half, beats 3 + 4</div>
       </div>
       <div class="panel">
-        <div class="ttl">at W = 4</div>
+        <div class="ttl">at W = 4 B</div>
         <div class="split-line cut">src IP — cut in half, beats 6 + 7</div>
         <div class="split-line cut">dst IP — cut in half, beats 7 + 8</div>
       </div>
@@ -1057,7 +1057,7 @@
 <section class="slide">
   <div class="inner">
     <h2>Collect first. Then slice.</h2>
-    <p class="assume">running example: <b>W = 8</b> &middot; one block = one byte</p>
+    <p class="assume">running example: <b>W = 8 B</b> &middot; one block = one byte</p>
     <div class="accflow">
       <div class="beatstack">
         <div class="mbrow"><span class="mblab">beat 0</span><div class="minibeat"><i class="mb c-eth"></i><i class="mb c-eth"></i><i class="mb c-eth"></i><i class="mb c-eth"></i><i class="mb c-eth"></i><i class="mb c-eth"></i><i class="mb c-eth"></i><i class="mb c-eth"></i></div></div>
@@ -1109,7 +1109,7 @@
           <span class="tick">0</span><span class="tick">1</span><span class="tick">2</span>
           <span class="tick">3</span><span class="tick">4</span><span class="tick">5</span>
         </div>
-        <div class="tl-cap"><b>header arriving</b> — 6 beats at W = 8<br>not latency: the bytes are still on the wire</div>
+        <div class="tl-cap"><b>header arriving</b> — 6 beats at W = 8 B<br>not latency: the bytes are still on the wire</div>
       </div>
       <div class="tl-group">
         <div class="tl-cells">
@@ -1212,11 +1212,11 @@
       </div>
       <div class="arrow">→</div>
       <div class="fanouts">
-        <div class="fo"><div class="w">W = 4</div><div class="b">11 beats</div></div>
-        <div class="fo"><div class="w">W = 8</div><div class="b">6 beats</div></div>
-        <div class="fo"><div class="w">W = 16</div><div class="b">3 beats</div></div>
-        <div class="fo"><div class="w">W = 32</div><div class="b">2 beats</div></div>
-        <div class="fo"><div class="w">W = 64</div><div class="b">1 beat</div></div>
+        <div class="fo"><div class="w">W = 4 B</div><div class="b">11 beats</div></div>
+        <div class="fo"><div class="w">W = 8 B</div><div class="b">6 beats</div></div>
+        <div class="fo"><div class="w">W = 16 B</div><div class="b">3 beats</div></div>
+        <div class="fo"><div class="w">W = 32 B</div><div class="b">2 beats</div></div>
+        <div class="fo"><div class="w">W = 64 B</div><div class="b">1 beat</div></div>
       </div>
     </div>
     <p class="sub">The OCaml runs on your laptop, not the FPGA. What it leaves behind is Verilog.</p>
