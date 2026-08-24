@@ -52,9 +52,9 @@ Further reading:
 - **[doc/DESIGN.md](doc/DESIGN.md)** — the architecture and the reasoning behind
   it: why the accumulator, how the checksum folds, and what is deliberately out
   of scope.
-- **[doc/LEARNING.md](doc/LEARNING.md)** — how the OCaml works, the
-  elaboration-time mental model Hardcaml depends on, and a walkthrough of the
-  one real bug the differential test caught.
+- **[doc/LEARNING.md](doc/LEARNING.md)** — a guided read of the source: the
+  elaboration-time mental model Hardcaml depends on, the two mistakes worth
+  learning from, and a quiz to check it landed.
 
 ## Results
 

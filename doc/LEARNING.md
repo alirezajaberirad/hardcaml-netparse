@@ -1,10 +1,12 @@
 # Learning guide
 
-You are going to be asked to explain this design. This document is the path
-from "I have a repo" to "I can defend every line of it."
+A guided read of the source, for anyone picking this repo up — including its
+author six months from now. It goes from "I have cloned this" to "I understand
+why each decision was made."
 
-Read [DESIGN.md](DESIGN.md) first — it covers *what* the hardware does. This one
-covers *how the OCaml works* and *what you will be asked*.
+Read [DESIGN.md](DESIGN.md) first: it covers *what* the hardware does. This one
+covers *how the OCaml works*, walks through the two mistakes worth learning
+from, and ends with a self-test.
 
 ---
 
@@ -124,8 +126,8 @@ model is worth writing.
 
 ## 5b. The optimisation that wasn't
 
-The second most instructive thing in the history, and the one most worth being
-able to tell.
+The second instructive episode in the history, and the one that generalises
+beyond this project.
 
 Synthesis came back with Fmax essentially flat across a **16× range** of
 datapath widths: 206, 208, 200, 212, 214 MHz. That is a real clue, and the
@@ -163,14 +165,13 @@ Two lessons, and they are the ones to actually carry:
    fold) and `_112` drives `err_bad_checksum`. The limit was **stage 2's fold**,
    one pipeline stage downstream of where it was being looked for.
 
-If you are asked "tell me about a time you were wrong," this is the answer. The
-reasoning was defensible, the experiment falsified it, and the fix was to get
-better data rather than to argue.
+Worth keeping because the reasoning was defensible and the experiment falsified
+it anyway. The useful response to that is better data, not a better argument.
 
-## 6. Questions you should be able to answer cold
+## 6. Quiz yourself
 
-Work through these out loud. If you cannot answer one, that is the part to
-re-read.
+A self-test to check the read landed. Work through them out loud; anything you
+cannot answer points at the section to go back to.
 
 **Architecture**
 1. Why accumulate the header and slice it, rather than extracting fields as they
@@ -203,20 +204,22 @@ re-read.
 16. The balanced-tree change moved the 128-bit variant +6.3%. Why is that not
     a result? What would you need to run to make it one?
 
-## 7. Honest gaps — know these before someone finds them
+## 7. What this core does not do
 
-A reviewer will look for what is missing. Better that you name it first.
+Stated plainly, so nobody has to reverse-engineer the boundaries from the source.
+Each of these is a deliberate scope decision rather than an oversight.
 
 - **No backpressure.** There is no `tready` port at all — the core is
-  unconditionally ready. Defensible for an ingress parser (see DESIGN.md §6),
-  but know it is a choice, not an oversight, and be ready to say what you would
-  put downstream (a FIFO) if the consumer could stall.
+  unconditionally ready. That is the right architecture for an ingress parser
+  (see DESIGN.md §6), but it is a constraint on what can sit downstream: a
+  consumer that can stall needs a FIFO between it and this core.
 - **The filter table is compile-time.** Real systems reconfigure rules at
   runtime, which means an AXI4-Lite register interface and a small RAM. The
   compile-time version makes a better *language* argument and a weaker
   *product* argument.
-- **No board.** These are post-route numbers from Vivado, not measurements on
-  silicon. Say "post-route", never "measured."
+- **No board.** Every number here is post-route from Vivado, not measured on
+  silicon. The distinction matters: place-and-route models timing, it does not
+  observe it.
 - **VLAN, IPv4 options, and fragments are rejected, not handled.**
 - **Payload is untouched.** The core classifies; it does not forward, buffer, or
   reassemble.
