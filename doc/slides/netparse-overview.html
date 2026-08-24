@@ -139,13 +139,6 @@
   }
   @media (prefers-reduced-motion: reduce) { .pkt { left: 40%; } }
 
-  /* The absent back-channel, marked on the link it is absent from. */
-  .noback {
-    position: absolute; left: 0; right: 0; top: 58%;
-    text-align: center; white-space: nowrap;
-    font-size: clamp(6.5px, 1.12vmin, 11px); color: var(--drop);
-  }
-
   /* ---------- wire budget ---------- */
   .budget, .budget-key {
     display: flex; gap: 3px; width: 100%; max-width: 780px;
@@ -683,7 +676,6 @@
         <div class="d">price updates,<br>UDP multicast</div>
       </div>
       <div class="wire">
-        <span class="noback">&#10007; no signal travels back</span>
         <div class="pkt" style="animation-delay: 0s"></div>
         <div class="pkt" style="animation-delay: .38s"></div>
         <div class="pkt" style="animation-delay: .76s"></div>
