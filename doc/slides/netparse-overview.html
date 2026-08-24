@@ -339,18 +339,28 @@
 
   /* ---------- accumulator ---------- */
   .accflow { display: flex; align-items: center; gap: 2.4vmin; margin-top: 5vmin; width: 100%; flex-wrap: wrap; }
-  .beatstack { display: grid; gap: .9vmin; }
-  .minibeat {
-    display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px;
+  /* States the running example, so the block counts can be checked against it. */
+  .assume {
+    font-size: clamp(8px, 1.42vmin, 13px); color: var(--text-dim);
+    margin: 1.8vmin 0 0; letter-spacing: .03em;
   }
-  .mb { width: 2.2vmin; min-width: 13px; height: 2.2vmin; min-height: 13px; border-radius: 2px; }
+  .assume b { color: var(--amber); font-weight: 600; }
+
+  .beatstack { display: grid; gap: .7vmin; flex: none; }
+  .mbrow { display: flex; align-items: center; gap: 1.2vmin; }
+  .mblab {
+    width: 7vmin; min-width: 40px; flex: none; text-align: right;
+    font-size: clamp(7px, 1.2vmin, 11px); color: var(--text-faint);
+  }
+  .minibeat { display: grid; grid-template-columns: repeat(8, 1fr); gap: 2px; }
+  .mb { width: 2.1vmin; min-width: 12px; height: 2.1vmin; min-height: 12px; border-radius: 2px; }
   .accbox {
     flex: 1; min-width: 30vmin;
     border: 2px solid var(--amber); border-radius: 10px;
     background: var(--amber-dim); padding: 2.4vmin;
   }
   .accbox .lbl { font-size: clamp(9px, 1.5vmin, 14px); color: var(--amber); letter-spacing: .1em; text-transform: uppercase; margin-bottom: 1.6vmin; }
-  .accbytes { display: grid; grid-template-columns: repeat(24, 1fr); gap: 2px; }
+  .accbytes { display: grid; grid-template-columns: repeat(48, 1fr); gap: 2px; }
   .ab { height: 3.4vmin; min-height: 20px; border-radius: 2px; }
 
   /* ---------- clock timeline ---------- */
@@ -917,6 +927,7 @@
 <section class="slide">
   <div class="inner">
     <h2>So the header arrives in chunks.</h2>
+    <p class="assume">running example: <b>W = 8</b> &middot; one block = one byte</p>
     <div class="scroller">
       <div class="ruler48">
         <div class="cell c-eth" style="grid-column: span 6">dst MAC</div>
@@ -1032,44 +1043,20 @@
 <section class="slide">
   <div class="inner">
     <h2>Collect first. Then slice.</h2>
+    <p class="assume">running example: <b>W = 8</b> &middot; one block = one byte</p>
     <div class="accflow">
       <div class="beatstack">
-        <div class="minibeat">
-          <i class="mb" style="background: var(--eth)"></i><i class="mb" style="background: var(--eth)"></i>
-          <i class="mb" style="background: var(--eth)"></i><i class="mb" style="background: var(--eth)"></i>
-          <i class="mb" style="background: var(--eth)"></i><i class="mb" style="background: var(--eth)"></i>
-          <i class="mb" style="background: var(--eth)"></i><i class="mb" style="background: var(--eth)"></i>
-        </div>
-        <div class="minibeat">
-          <i class="mb" style="background: var(--eth)"></i><i class="mb" style="background: var(--eth)"></i>
-          <i class="mb" style="background: var(--eth)"></i><i class="mb" style="background: var(--eth)"></i>
-          <i class="mb" style="background: var(--eth)"></i><i class="mb" style="background: var(--eth)"></i>
-          <i class="mb" style="background: var(--ip)"></i><i class="mb" style="background: var(--ip)"></i>
-        </div>
-        <div class="minibeat">
-          <i class="mb" style="background: var(--ip)"></i><i class="mb" style="background: var(--ip)"></i>
-          <i class="mb" style="background: var(--ip)"></i><i class="mb" style="background: var(--ip)"></i>
-          <i class="mb" style="background: var(--ip)"></i><i class="mb" style="background: var(--ip)"></i>
-          <i class="mb" style="background: var(--ip)"></i><i class="mb" style="background: var(--ip)"></i>
-        </div>
+        <div class="mbrow"><span class="mblab">beat 0</span><div class="minibeat"><i class="mb c-eth"></i><i class="mb c-eth"></i><i class="mb c-eth"></i><i class="mb c-eth"></i><i class="mb c-eth"></i><i class="mb c-eth"></i><i class="mb c-eth"></i><i class="mb c-eth"></i></div></div>
+        <div class="mbrow"><span class="mblab">beat 1</span><div class="minibeat"><i class="mb c-eth"></i><i class="mb c-eth"></i><i class="mb c-eth"></i><i class="mb c-eth"></i><i class="mb c-eth"></i><i class="mb c-eth"></i><i class="mb c-ip"></i><i class="mb c-ip"></i></div></div>
+        <div class="mbrow"><span class="mblab">beat 2</span><div class="minibeat"><i class="mb c-ip"></i><i class="mb c-ip"></i><i class="mb c-ip"></i><i class="mb c-ip"></i><i class="mb c-ip"></i><i class="mb c-ip"></i><i class="mb c-ip"></i><i class="mb c-ip"></i></div></div>
+        <div class="mbrow"><span class="mblab">beat 3</span><div class="minibeat"><i class="mb c-ip"></i><i class="mb c-ip"></i><i class="mb c-ip"></i><i class="mb c-ip"></i><i class="mb c-ip"></i><i class="mb c-ip"></i><i class="mb c-ip"></i><i class="mb c-ip"></i></div></div>
+        <div class="mbrow"><span class="mblab">beat 4</span><div class="minibeat"><i class="mb c-ip"></i><i class="mb c-ip"></i><i class="mb c-udp"></i><i class="mb c-udp"></i><i class="mb c-udp"></i><i class="mb c-udp"></i><i class="mb c-udp"></i><i class="mb c-udp"></i></div></div>
+        <div class="mbrow"><span class="mblab">beat 5</span><div class="minibeat"><i class="mb c-udp"></i><i class="mb c-udp"></i><i class="mb c-pay"></i><i class="mb c-pay"></i><i class="mb c-pay"></i><i class="mb c-pay"></i><i class="mb c-pay"></i><i class="mb c-pay"></i></div></div>
       </div>
-      <div class="arrow">→</div>
+      <div class="arrow">&rarr;</div>
       <div class="accbox">
-        <div class="lbl">header accumulator</div>
-        <div class="accbytes">
-          <i class="ab" style="background: var(--eth)"></i><i class="ab" style="background: var(--eth)"></i>
-          <i class="ab" style="background: var(--eth)"></i><i class="ab" style="background: var(--eth)"></i>
-          <i class="ab" style="background: var(--eth)"></i><i class="ab" style="background: var(--eth)"></i>
-          <i class="ab" style="background: var(--eth)"></i><i class="ab" style="background: var(--eth)"></i>
-          <i class="ab" style="background: var(--ip)"></i><i class="ab" style="background: var(--ip)"></i>
-          <i class="ab" style="background: var(--ip)"></i><i class="ab" style="background: var(--ip)"></i>
-          <i class="ab" style="background: var(--ip)"></i><i class="ab" style="background: var(--ip)"></i>
-          <i class="ab" style="background: var(--ip)"></i><i class="ab" style="background: var(--ip)"></i>
-          <i class="ab" style="background: var(--ip)"></i><i class="ab" style="background: var(--ip)"></i>
-          <i class="ab" style="background: var(--udp)"></i><i class="ab" style="background: var(--udp)"></i>
-          <i class="ab" style="background: var(--udp)"></i><i class="ab" style="background: var(--udp)"></i>
-          <i class="ab" style="background: var(--pay)"></i><i class="ab" style="background: var(--pay)"></i>
-        </div>
+        <div class="lbl">header accumulator &mdash; 48 bytes = 6 beats &times; 8</div>
+        <div class="accbytes"><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-udp"></i><i class="ab c-udp"></i><i class="ab c-udp"></i><i class="ab c-udp"></i><i class="ab c-udp"></i><i class="ab c-udp"></i><i class="ab c-udp"></i><i class="ab c-udp"></i><i class="ab c-pay"></i><i class="ab c-pay"></i><i class="ab c-pay"></i><i class="ab c-pay"></i><i class="ab c-pay"></i><i class="ab c-pay"></i></div>
       </div>
     </div>
     <div class="legend mini">
