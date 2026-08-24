@@ -330,6 +330,9 @@
     font-size: clamp(9px, 1.4vmin, 13px); color: var(--text-dim);
   }
   .legend span { display: inline-flex; align-items: center; gap: 1vmin; }
+  /* Compact variant, so the key can repeat on dense slides without crowding. */
+  .legend.mini { gap: 2vmin; margin-top: 2vmin; font-size: clamp(7.5px, 1.22vmin, 12px); }
+  .legend.mini .sw { width: 1.2vmin; height: 1.2vmin; min-width: 9px; min-height: 9px; }
   .sw {
     width: 1.5vmin; height: 1.5vmin; min-width: 11px; min-height: 11px;
     border-radius: 3px; flex: none;
@@ -478,6 +481,11 @@
       <span class="oct e">00</span><span class="oct e">11</span><span class="oct e">22</span>
       <span class="oct e">33</span><span class="oct e">44</span><span class="oct e">55</span>
     </div>
+    <div class="legend mini">
+      <span><i class="sw" style="background: var(--eth)"></i> Ethernet — which box, next hop</span>
+      <span><i class="sw" style="background: var(--ip)"></i> IPv4 — which machine, end to end</span>
+      <span><i class="sw" style="background: var(--udp)"></i> UDP — which program</span>
+    </div>
     <p class="sub">A <span class="amber">MAC address</span>. Fixed at the factory, unique in the world — but only meaningful to machines on the same local wire. It cannot get you across the internet.</p>
   </div>
 </section>
@@ -488,6 +496,11 @@
     <p class="eyebrow">IP address — assigned, and routable</p>
     <div class="addr">
       <span class="oct i">239</span><span class="oct i">192</span><span class="oct i">0</span><span class="oct i">2</span>
+    </div>
+    <div class="legend mini">
+      <span><i class="sw" style="background: var(--eth)"></i> Ethernet — which box, next hop</span>
+      <span><i class="sw" style="background: var(--ip)"></i> IPv4 — which machine, end to end</span>
+      <span><i class="sw" style="background: var(--udp)"></i> UDP — which program</span>
     </div>
     <p class="sub">An <span class="amber">IP address</span>. Four bytes, handed out rather than burned in. This one <em>can</em> cross the planet, because routers know how to forward it.</p>
   </div>
@@ -783,6 +796,12 @@
         <div style="flex: 34"></div>
         <div class="br udpb" style="flex: 26">UDP len = 26</div>
       </div>
+    </div>
+    <div class="legend mini">
+      <span><i class="sw" style="background: var(--eth)"></i> Ethernet</span>
+      <span><i class="sw" style="background: var(--ip)"></i> IPv4</span>
+      <span><i class="sw" style="background: var(--udp)"></i> UDP</span>
+      <span><i class="sw" style="background: var(--pay)"></i> payload</span>
     </div>
     <p class="sub">Each envelope counts <em>itself plus everything inside it</em> — and nothing outside. Neither one counts the Ethernet header, because neither layer knows it is there.</p>
   </div>

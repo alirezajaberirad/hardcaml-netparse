@@ -24,6 +24,10 @@
     --udp: #C083A8;
     --pay: #47536A;
 
+    /* Non-protocol emphasis, deliberately outside the eth/ip/udp palette so it
+       cannot be misread as a layer. */
+    --hw:  #98A2B8;
+
     --pass: #4FBE8B;
     --drop: #E4735C;
   }
@@ -146,7 +150,7 @@
     display: flex; align-items: center; justify-content: center;
     font-size: clamp(9px, 1.6vmin, 15px); font-weight: 600; color: #08101C;
   }
-  .s-pre { background: var(--udp); }
+  .s-pre { background: var(--hw); }
   .s-frm { background: var(--amber); }
   .s-gap { background: var(--pay); color: var(--text-dim); }
   .budget-key {
@@ -264,6 +268,9 @@
     font-size: clamp(10px, 1.6vmin, 15px); color: var(--text-dim);
   }
   .legend span { display: inline-flex; align-items: center; gap: 1vmin; }
+  /* Compact variant, so the key can repeat on dense slides without crowding. */
+  .legend.mini { gap: 2vmin; margin-top: 2vmin; font-size: clamp(7.5px, 1.22vmin, 12px); }
+  .legend.mini .sw { width: 1.2vmin; height: 1.2vmin; min-width: 9px; min-height: 9px; }
   .sw { width: 1.6vmin; height: 1.6vmin; min-width: 11px; min-height: 11px; border-radius: 3px; }
 
   /* ---------- lookup ---------- */
@@ -401,8 +408,8 @@
   .cn-d {
     font-size: clamp(7px, 1.22vmin, 12px); color: var(--text-dim); line-height: 1.42;
   }
-  .cnode.hard { border-color: var(--udp); background: rgba(192,131,168,.10); }
-  .cnode.hard .cn-tag, .cnode.hard .cn-t { color: var(--udp); }
+  .cnode.hard { border-color: var(--hw); background: rgba(152,162,184,.12); }
+  .cnode.hard .cn-tag, .cnode.hard .cn-t { color: var(--hw); }
   .cnode.mine { border-color: var(--amber); background: var(--amber-dim); }
   .cnode.mine .cn-tag, .cnode.mine .cn-t { color: var(--amber); }
 
@@ -897,6 +904,12 @@
         <div class="cbeat" style="grid-column: span 8">beat 5</div>
       </div>
     </div>
+    <div class="legend mini">
+      <span><i class="sw" style="background: var(--eth)"></i> Ethernet</span>
+      <span><i class="sw" style="background: var(--ip)"></i> IPv4</span>
+      <span><i class="sw" style="background: var(--udp)"></i> UDP</span>
+      <span><i class="sw" style="background: var(--pay)"></i> payload</span>
+    </div>
     <p class="sub">At W = 8, six transfers and the whole 42-byte header has arrived. Each transfer is a <span style="color: var(--amber)">beat</span> — and notice beat 5 already carries payload.</p>
     <div class="foot">
       <span><b>beat</b> — one transfer on the bus: the bytes that move in a single clock cycle</span>
@@ -959,6 +972,11 @@
       </div>
     </div>
 
+    <div class="legend mini">
+      <span><i class="sw" style="background: var(--ip)"></i> IPv4</span>
+      <span><i class="sw" style="background: var(--udp)"></i> UDP</span>
+      <span><i class="sw" style="background: var(--ink-3); border: 1px solid var(--line)"></i> one beat</span>
+    </div>
     <p class="sub">Same packet, same bytes. Only the beat boundaries move — and a field that survives whole at one width gets sliced at another.</p>
   </div>
 </section>
@@ -1006,6 +1024,12 @@
           <i class="ab" style="background: var(--pay)"></i><i class="ab" style="background: var(--pay)"></i>
         </div>
       </div>
+    </div>
+    <div class="legend mini">
+      <span><i class="sw" style="background: var(--eth)"></i> Ethernet</span>
+      <span><i class="sw" style="background: var(--ip)"></i> IPv4</span>
+      <span><i class="sw" style="background: var(--udp)"></i> UDP</span>
+      <span><i class="sw" style="background: var(--pay)"></i> payload</span>
     </div>
     <p class="sub">Shift every beat in at the top. Wait until all 42 bytes have landed.</p>
   </div>
