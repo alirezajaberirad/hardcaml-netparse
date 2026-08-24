@@ -380,6 +380,32 @@
   .foot b { color: var(--text-dim); font-weight: 600; }
   .slide.center .foot { justify-content: center; }
 
+  /* ---------- chopping diagram ---------- */
+  .chop { width: 100%; margin-top: 4vmin; display: grid; gap: .9vmin; }
+  .crow { display: flex; align-items: center; gap: 1.4vmin; }
+  .clab {
+    width: 9vmin; min-width: 48px; flex: none; text-align: right;
+    font-size: clamp(7.5px, 1.3vmin, 12px); color: var(--text-dim);
+  }
+  .cgrid { flex: 1; display: grid; grid-template-columns: repeat(12, 1fr); gap: 3px; }
+  .cnum {
+    text-align: center; font-size: clamp(6.5px, 1.1vmin, 10px);
+    color: var(--text-faint); font-variant-numeric: tabular-nums;
+  }
+  .cseg, .cbeat {
+    height: 4.2vmin; min-height: 26px; border-radius: 4px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: clamp(7px, 1.28vmin, 12px); font-weight: 600;
+  }
+  .cseg { color: #08101C; }
+  .cbeat { background: var(--ink-3); border: 1px solid var(--line); color: var(--text-dim); }
+  .split-line {
+    font-size: clamp(8px, 1.4vmin, 13px); border-left: 3px solid;
+    padding: .6vmin 0 .6vmin 1.4vmin; margin-bottom: .7vmin;
+  }
+  .split-line.whole { border-left-color: var(--pass); color: var(--pass); }
+  .split-line.cut { border-left-color: var(--drop); color: var(--drop); }
+
   /* ---------- handshake waveform ---------- */
   .wave { width: 100%; display: grid; gap: 1.1vmin; margin-top: 2.4vmin; }
   .wrow { display: flex; align-items: center; gap: 1.4vmin; }
@@ -692,38 +718,58 @@
 <!-- 7 ............................................................. -->
 <section class="slide">
   <div class="inner">
-    <h2>Fields split. And the split moves.</h2>
-    <div class="two">
-      <div class="panel">
-        <div class="ttl">8 bytes per beat</div>
-        <div class="brow"><span class="blab">beat 3</span><div class="lanes" style="grid-template-columns: repeat(8,1fr)">
-          <div class="lane c-ip faint"></div><div class="lane c-ip faint"></div>
-          <div class="lane c-ip faint"></div><div class="lane c-ip faint"></div>
-          <div class="lane c-ip faint"></div><div class="lane c-ip faint"></div>
-          <div class="lane c-ip key">30</div><div class="lane c-ip key">31</div>
-        </div></div>
-        <div class="brow"><span class="blab">beat 4</span><div class="lanes" style="grid-template-columns: repeat(8,1fr)">
-          <div class="lane c-ip key">32</div><div class="lane c-ip key">33</div>
-          <div class="lane c-udp faint"></div><div class="lane c-udp faint"></div>
-          <div class="lane c-udp faint"></div><div class="lane c-udp faint"></div>
-          <div class="lane c-udp faint"></div><div class="lane c-udp faint"></div>
-        </div></div>
-        <div class="verdict">dst IP → beats 3 + 4</div>
+    <h2>One packet. The cuts land differently.</h2>
+
+    <div class="chop">
+      <div class="crow">
+        <span class="clab">byte</span>
+        <div class="cgrid">
+          <span class="cnum">24</span><span class="cnum">25</span><span class="cnum">26</span>
+          <span class="cnum">27</span><span class="cnum">28</span><span class="cnum">29</span>
+          <span class="cnum">30</span><span class="cnum">31</span><span class="cnum">32</span>
+          <span class="cnum">33</span><span class="cnum">34</span><span class="cnum">35</span>
+        </div>
       </div>
-      <div class="panel">
-        <div class="ttl">4 bytes per beat</div>
-        <div class="brow"><span class="blab">beat 7</span><div class="lanes" style="grid-template-columns: repeat(4,1fr)">
-          <div class="lane c-ip faint">28</div><div class="lane c-ip faint">29</div>
-          <div class="lane c-ip key">30</div><div class="lane c-ip key">31</div>
-        </div></div>
-        <div class="brow"><span class="blab">beat 8</span><div class="lanes" style="grid-template-columns: repeat(4,1fr)">
-          <div class="lane c-ip key">32</div><div class="lane c-ip key">33</div>
-          <div class="lane c-udp faint">34</div><div class="lane c-udp faint">35</div>
-        </div></div>
-        <div class="verdict">dst IP → beats 7 + 8</div>
+      <div class="crow">
+        <span class="clab">field</span>
+        <div class="cgrid">
+          <div class="cseg c-ip" style="grid-column: span 2">cksum</div>
+          <div class="cseg c-ip" style="grid-column: span 4">src IP</div>
+          <div class="cseg c-ip" style="grid-column: span 4">dst IP</div>
+          <div class="cseg c-udp" style="grid-column: span 2">sport</div>
+        </div>
+      </div>
+      <div class="crow">
+        <span class="clab">W = 8</span>
+        <div class="cgrid">
+          <div class="cbeat" style="grid-column: span 8">beat 3</div>
+          <div class="cbeat" style="grid-column: span 4">beat 4</div>
+        </div>
+      </div>
+      <div class="crow">
+        <span class="clab">W = 4</span>
+        <div class="cgrid">
+          <div class="cbeat" style="grid-column: span 4">beat 6</div>
+          <div class="cbeat" style="grid-column: span 4">beat 7</div>
+          <div class="cbeat" style="grid-column: span 4">beat 8</div>
+        </div>
       </div>
     </div>
-    <p class="sub">Change the bus width and every field lands somewhere new.</p>
+
+    <div class="two" style="margin-top: 3.4vmin">
+      <div class="panel">
+        <div class="ttl">at W = 8</div>
+        <div class="split-line whole">src IP — arrives whole, inside beat 3</div>
+        <div class="split-line cut">dst IP — cut in half, beats 3 + 4</div>
+      </div>
+      <div class="panel">
+        <div class="ttl">at W = 4</div>
+        <div class="split-line cut">src IP — cut in half, beats 6 + 7</div>
+        <div class="split-line cut">dst IP — cut in half, beats 7 + 8</div>
+      </div>
+    </div>
+
+    <p class="sub">Same packet, same bytes. Only the beat boundaries move — and a field that survives whole at one width gets sliced at another.</p>
     <div class="foot">
       <span><b>beat</b> — one transfer on the bus: the bytes that move in a single clock cycle</span>
       <span><b>not the same as a cycle</b> — an idle cycle carries no beat, so the parser counts beats, never clocks</span>
