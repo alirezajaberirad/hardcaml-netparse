@@ -363,6 +363,20 @@
   .accbytes { display: grid; grid-template-columns: repeat(48, 1fr); gap: 2px; }
   .ab { height: 3.4vmin; min-height: 20px; border-radius: 2px; }
 
+  /* Byte ranges under the accumulator. Adjacent boundary indices (13/14,
+     33/34, 41/42) collide at 1/48 of the width, so each segment carries its
+     own range instead. */
+  .accidx {
+    display: grid; grid-template-columns: repeat(48, 1fr); gap: 2px;
+    margin-top: .9vmin; font-size: clamp(6.5px, 1.12vmin, 11px);
+    font-variant-numeric: tabular-nums;
+  }
+  .ai {
+    text-align: center; border-top: 1px solid currentColor;
+    padding-top: .5vmin; white-space: nowrap;
+  }
+  .ai.past { color: var(--text-faint); }
+
   /* ---------- clock timeline ---------- */
   .timeline {
     display: flex; gap: 4vmin; width: 100%; margin-top: 4vmin;
@@ -1057,6 +1071,12 @@
       <div class="accbox">
         <div class="lbl">header accumulator &mdash; 48 bytes = 6 beats &times; 8</div>
         <div class="accbytes"><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-eth"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-ip"></i><i class="ab c-udp"></i><i class="ab c-udp"></i><i class="ab c-udp"></i><i class="ab c-udp"></i><i class="ab c-udp"></i><i class="ab c-udp"></i><i class="ab c-udp"></i><i class="ab c-udp"></i><i class="ab c-pay"></i><i class="ab c-pay"></i><i class="ab c-pay"></i><i class="ab c-pay"></i><i class="ab c-pay"></i><i class="ab c-pay"></i></div>
+        <div class="accidx">
+          <div class="ai" style="grid-column: span 14; color: var(--eth)">0 &ndash; 13</div>
+          <div class="ai" style="grid-column: span 20; color: var(--ip)">14 &ndash; 33</div>
+          <div class="ai" style="grid-column: span 8; color: var(--udp)">34 &ndash; 41</div>
+          <div class="ai past" style="grid-column: span 6">42 &ndash; 47</div>
+        </div>
       </div>
     </div>
     <div class="legend mini">
@@ -1065,7 +1085,7 @@
       <span><i class="sw" style="background: var(--udp)"></i> UDP</span>
       <span><i class="sw" style="background: var(--pay)"></i> payload</span>
     </div>
-    <p class="sub">Shift every beat in at the top. Wait until all 42 bytes have landed.</p>
+    <p class="sub">Shift every beat in at the top. Wait until all 42 bytes have landed &mdash; then every field sits at a fixed, known offset. Bytes <b style="color: var(--text-faint); font-weight: 400">42&ndash;47</b> are payload the last beat dragged in; the parser simply never slices them.</p>
   </div>
 </section>
 
