@@ -369,6 +369,17 @@
   }
   .pstage .ds { font-size: clamp(10px, 1.6vmin, 15px); color: var(--text-dim); line-height: 1.5; }
 
+  /* First-use expansions, set as a footnote rule under the slide content. */
+  .foot {
+    width: 100%; margin-top: 3.2vmin;
+    border-top: 1px solid var(--line); padding-top: 1.3vmin;
+    display: flex; flex-wrap: wrap; gap: .4vmin 2.4vmin;
+    font-size: clamp(7px, 1.15vmin, 11px); color: var(--text-faint);
+    line-height: 1.5;
+  }
+  .foot b { color: var(--text-dim); font-weight: 600; }
+  .slide.center .foot { justify-content: center; }
+
   /* ---------- handshake waveform ---------- */
   .wave { width: 100%; display: grid; gap: 1.1vmin; margin-top: 2.4vmin; }
   .wrow { display: flex; align-items: center; gap: 1.4vmin; }
@@ -502,6 +513,10 @@
       </div>
     </div>
     <p class="sub">No flow control. You cannot ask it to slow down.</p>
+    <div class="foot">
+      <span><b>FPGA</b> — Field-Programmable Gate Array: a chip whose logic you define</span>
+      <span><b>UDP</b> — User Datagram Protocol</span>
+    </div>
   </div>
 </section>
 
@@ -560,6 +575,11 @@
       </div>
     </div>
     <p class="sub">The CPU is not just slower. It is <em>unpredictable</em>.</p>
+    <div class="foot">
+      <span><b>NIC</b> — Network Interface Card</span>
+      <span><b>DMA</b> — Direct Memory Access</span>
+      <span><b>MAC</b> — Media Access Control: the Ethernet block, not an address</span>
+    </div>
   </div>
 </section>
 
@@ -640,6 +660,15 @@
       <div class="job j-udp"><b>cksum</b><span>covers the data &mdash; skipped</span></div>
     </div>
     <p class="sub" style="margin-top: 2.6vmin">Amber = read by the core. It never looks at the payload &mdash; its job is to say <em>where this goes</em>, not what it says.</p>
+    <div class="foot">
+      <span><b>IPv4</b> — Internet Protocol version 4</span>
+      <span><b>dst / src</b> — destination / source</span>
+      <span><b>v</b> — version + header length</span>
+      <span><b>frag</b> — fragment flags and offset</span>
+      <span><b>p</b> — protocol</span>
+      <span><b>cksum</b> — checksum</span>
+      <span><b>sport / dport</b> — source / destination port</span>
+    </div>
   </div>
 </section>
 
@@ -851,6 +880,10 @@
     </div>
 
     <p class="sub">A receiver that can stall is a receiver that loses market data. The wire has no brakes, so neither does this.</p>
+    <div class="foot">
+      <span><b>AXI4-Stream</b> — the ARM AMBA streaming interface: how FPGA blocks pass data to each other</span>
+      <span><b>t&hellip;</b> — the AXI naming convention for a stream signal</span>
+    </div>
   </div>
 </section>
 
@@ -895,6 +928,12 @@
       </table>
     </div>
     <p class="sub">12,715 differential checks. Zero failures.</p>
+    <div class="foot">
+      <span><b>LUT</b> — Look-Up Table: the FPGA's unit of combinational logic</span>
+      <span><b>FF</b> — Flip-Flop: one bit of register</span>
+      <span><b>Fmax</b> — the fastest clock the design closes timing at</span>
+      <span><b>GbE</b> — Gigabit Ethernet</span>
+    </div>
   </div>
 </section>
 

@@ -277,6 +277,17 @@
     color: var(--amber); font-weight: 600;
   }
 
+  /* First-use expansions, set as a footnote rule under the slide content. */
+  .foot {
+    width: 100%; margin-top: 3.2vmin;
+    border-top: 1px solid var(--line); padding-top: 1.3vmin;
+    display: flex; flex-wrap: wrap; gap: .4vmin 2.4vmin;
+    font-size: clamp(7px, 1.15vmin, 11px); color: var(--text-faint);
+    line-height: 1.5;
+  }
+  .foot b { color: var(--text-dim); font-weight: 600; }
+  .slide.center .foot { justify-content: center; }
+
   /* ---------- nested length spans ---------- */
   .lenmap { width: 100%; margin-top: 4.5vmin; }
   .lenrow { display: flex; }
@@ -419,6 +430,10 @@
         </div>
       </div>
     </div>
+    <div class="foot">
+      <span><b>IP</b> — Internet Protocol</span>
+      <span><b>UDP</b> — User Datagram Protocol</span>
+    </div>
   </div>
 </section>
 
@@ -447,6 +462,10 @@
         <span class="ask">The thing you actually wanted to send.</span>
         <span class="ans">the rest</span>
       </div>
+    </div>
+    <div class="foot">
+      <span><b>IPv4</b> — Internet Protocol version 4</span>
+      <span><b>MAC</b> — Media Access Control</span>
     </div>
   </div>
 </section>
@@ -542,6 +561,9 @@
       </div>
     </div>
     <p class="sub">TCP guarantees delivery. It buys that with round trips.</p>
+    <div class="foot">
+      <span><b>TCP</b> — Transmission Control Protocol</span>
+    </div>
   </div>
 </section>
 
@@ -657,6 +679,10 @@
         <span class="ans">96 bit-times</span>
       </div>
     </div>
+    <div class="foot">
+      <span><b>SFD</b> — Start Frame Delimiter</span>
+      <span><b>bit-time</b> — how long one bit takes on the wire</span>
+    </div>
   </div>
 </section>
 
@@ -726,6 +752,15 @@
     </div>
 
     <p class="sub" style="margin-top: 2.4vmin">Three envelopes flattened into 42 bytes, same order every time &mdash; then the payload they were wrapping.</p>
+    <div class="foot">
+      <span><b>dst / src</b> — destination / source</span>
+      <span><b>v</b> — version + IHL (Internet Header Length)</span>
+      <span><b>frag</b> — fragment flags and offset</span>
+      <span><b>t</b> — TTL (Time To Live)</span>
+      <span><b>p</b> — protocol</span>
+      <span><b>cksum</b> — checksum</span>
+      <span><b>sport / dport</b> — source / destination port</span>
+    </div>
   </div>
 </section>
 
